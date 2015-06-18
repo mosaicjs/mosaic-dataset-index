@@ -126,7 +126,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _classCallCheck(this, DataSetIndex);
 
 	        _get(Object.getPrototypeOf(DataSetIndex.prototype), 'constructor', this).apply(this, args);
-	        this.index(this.options.resources);
 	    }
 
 	    _inherits(DataSetIndex, _DerivativeDataSet);
@@ -178,20 +177,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: 'index',
-
-	        // ----------------------------------------------------------------------
-
-	        value: function index(resources, reset) {
-	            var that = this;
-	            if (reset) {
-	                delete that._indexPromise;
-	            }
-	            return that._getLunrIndex().then(function (index) {
-	                return that._runSearch();
-	            });
-	        }
-	    }, {
 	        key: '_onMainDataSetUpdate',
 
 	        // ----------------------------------------------------------------------
@@ -199,9 +184,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /** Updates the list */
 	        value: function _onMainDataSetUpdate(intent) {
 	            var that = this;
-	            // FIXME: create and use resource diff here!
-	            return intent.then(function () {
-	                return that.index(that.dataSet.resources, true);
+	            return intent.after(function () {
+	                return that._runSearch();
 	            });
 	        }
 	    }, {
@@ -230,8 +214,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getLunrIndex() {
 	            var _this = this;
 
+	            if (this.parentVersion !== this.dataSet.version) {
+	                delete this._indexPromise;
+	            }
 	            if (!this._indexPromise) {
 	                (function () {
+	                    _this.parentVersion = _this.dataSet.version;
 	                    var that = _this;
 	                    that._indexPromise = new _promise2['default'](function (resolve, reject) {
 	                        try {
@@ -503,7 +491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
@@ -512,7 +500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
-	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.9
+	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.10
 	 * Copyright (C) 2015 Oliver Nightingale
 	 * MIT Licensed
 	 * @license
@@ -567,7 +555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return idx;
 	  };
 
-	  lunr.version = "0.5.9";
+	  lunr.version = "0.5.10";
 	  /*!
 	   * lunr.utils
 	   * Copyright (C) 2015 Oliver Nightingale
@@ -612,7 +600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Can bind a single function to many different events in one call.
 	   *
 	   * @param {String} [eventName] The name(s) of events to bind this function to.
-	   * @param {Function} handler The function to call when an event is fired.
+	   * @param {Function} fn The function to call when an event is fired.
 	   * @memberOf EventEmitter
 	   */
 	  lunr.EventEmitter.prototype.addListener = function () {
@@ -632,7 +620,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Removes a handler function from a specific event.
 	   *
 	   * @param {String} eventName The name of the event to remove this function from.
-	   * @param {Function} handler The function to remove from an event.
+	   * @param {Function} fn The function to remove from an event.
 	   * @memberOf EventEmitter
 	   */
 	  lunr.EventEmitter.prototype.removeListener = function (name, fn) {
@@ -1334,7 +1322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * The handler can be bound to many events at the same time.
 	   *
 	   * @param {String} [eventName] The name(s) of events to bind the function to.
-	   * @param {Function} handler The serialised set to load.
+	   * @param {Function} fn The serialised set to load.
 	   * @memberOf Index
 	   */
 	  lunr.Index.prototype.on = function () {
@@ -1346,7 +1334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Removes a handler from an event being emitted by the index.
 	   *
 	   * @param {String} eventName The name of events to remove the function from.
-	   * @param {Function} handler The serialised set to load.
+	   * @param {Function} fn The serialised set to load.
 	   * @memberOf Index
 	   */
 	  lunr.Index.prototype.off = function (name, fn) {
@@ -1556,7 +1544,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        idf = 1;
 
 	    if (documentFrequency > 0) {
-	      idf = 1 + Math.log(this.tokenStore.length / documentFrequency);
+	      idf = 1 + Math.log(this.documentStore.length / documentFrequency);
 	    }
 
 	    return this._idfCache[cacheKey] = idf;
@@ -2400,13 +2388,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (typeof fn !== 'function') {
 	    throw new TypeError('not a function');
 	  }
-	  this._32 = 0;
-	  this._8 = null;
-	  this._89 = [];
+	  this._41 = 0;
+	  this._86 = null;
+	  this._17 = [];
 	  if (fn === noop) return;
 	  doResolve(fn, this);
 	}
-	Promise._83 = noop;
+	Promise._1 = noop;
 
 	Promise.prototype.then = function (onFulfilled, onRejected) {
 	  if (this.constructor !== Promise) {
@@ -2425,24 +2413,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	};
 	function handle(self, deferred) {
-	  while (self._32 === 3) {
-	    self = self._8;
+	  while (self._41 === 3) {
+	    self = self._86;
 	  }
-	  if (self._32 === 0) {
-	    self._89.push(deferred);
+	  if (self._41 === 0) {
+	    self._17.push(deferred);
 	    return;
 	  }
 	  asap(function () {
-	    var cb = self._32 === 1 ? deferred.onFulfilled : deferred.onRejected;
+	    var cb = self._41 === 1 ? deferred.onFulfilled : deferred.onRejected;
 	    if (cb === null) {
-	      if (self._32 === 1) {
-	        resolve(deferred.promise, self._8);
+	      if (self._41 === 1) {
+	        resolve(deferred.promise, self._86);
 	      } else {
-	        reject(deferred.promise, self._8);
+	        reject(deferred.promise, self._86);
 	      }
 	      return;
 	    }
-	    var ret = tryCallOne(cb, self._8);
+	    var ret = tryCallOne(cb, self._86);
 	    if (ret === IS_ERROR) {
 	      reject(deferred.promise, LAST_ERROR);
 	    } else {
@@ -2461,8 +2449,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return reject(self, LAST_ERROR);
 	    }
 	    if (then === self.then && newValue instanceof Promise) {
-	      self._32 = 3;
-	      self._8 = newValue;
+	      self._41 = 3;
+	      self._86 = newValue;
 	      finale(self);
 	      return;
 	    } else if (typeof then === 'function') {
@@ -2470,21 +2458,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	  }
-	  self._32 = 1;
-	  self._8 = newValue;
+	  self._41 = 1;
+	  self._86 = newValue;
 	  finale(self);
 	}
 
 	function reject(self, newValue) {
-	  self._32 = 2;
-	  self._8 = newValue;
+	  self._41 = 2;
+	  self._86 = newValue;
 	  finale(self);
 	}
 	function finale(self) {
-	  for (var i = 0; i < self._89.length; i++) {
-	    handle(self, self._89[i]);
+	  for (var i = 0; i < self._17.length; i++) {
+	    handle(self, self._17[i]);
 	  }
-	  self._89 = null;
+	  self._17 = null;
 	}
 
 	function Handler(onFulfilled, onRejected, promise) {
@@ -2518,7 +2506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
 
@@ -2804,9 +2792,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EMPTYSTRING = valuePromise('');
 
 	function valuePromise(value) {
-	  var p = new Promise(Promise._83);
-	  p._32 = 1;
-	  p._8 = value;
+	  var p = new Promise(Promise._1);
+	  p._41 = 1;
+	  p._86 = value;
 	  return p;
 	}
 	Promise.resolve = function (value) {
@@ -2851,16 +2839,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (val && (typeof val === 'object' || typeof val === 'function')) {
 	          if (val instanceof Promise && val.then === Promise.prototype.then) {
-	            while (val._32 === 3) {
-	              val = val._8;
+	            while (val._41 === 3) {
+	              val = val._86;
 	            }
-	            if (val._32 === 1) {
+	            if (val._41 === 1) {
 	              _x = i;
-	              _x2 = val._8;
+	              _x2 = val._86;
 	              _again = true;
 	              continue _function;
 	            }
-	            if (val._32 === 2) reject(val._8);
+	            if (val._41 === 2) reject(val._86);
 	            val.then(function (val) {
 	              res(i, val);
 	            }, reject);
