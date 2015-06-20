@@ -113,8 +113,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * This adapters treats all data set resources as GeoJson objects and provides
-	 * some utility methods.
+	 * This adapters automatically re-indexes all data object in the parent data
+	 * set.
 	 */
 
 	var DataSetIndex = (function (_DerivativeDataSet) {
@@ -136,8 +136,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this.updateSearchParams({ query: query });
 	        }
 	    }, {
-	        key: 'setResourceFilter',
-	        value: function setResourceFilter(filter) {
+	        key: 'setDataFilter',
+	        value: function setDataFilter(filter) {
 	            return this.updateSearchParams({ filter: filter });
 	        }
 	    }, {
@@ -165,7 +165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return this.action('params', function (intent) {
 	                var updated = setParam('_query', 'query');
-	                updated |= setParam('_resourceFilter', 'filter');
+	                updated |= setParam('_dataFilter', 'filter');
 	                updated |= setParam('_fields', 'fields');
 	                if (updated) {
 	                    return this._runSearch().then(function () {
@@ -203,7 +203,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        list.push(r);
 	                    });
 	                    list = that._filterSearchResult(list);
-	                    return that.setResources(list);
+	                    return that.setItems(list);
 	                });
 	            });
 	        }
@@ -248,8 +248,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            reject(err);
 	                        }
 	                    }).then(function (index) {
-	                        var resources = that.dataSet.resources;
-	                        return that._reindexResources(index, resources).then(function () {
+	                        var items = that.dataSet.items;
+	                        return that._reindexItems(index, items).then(function () {
 	                            return index;
 	                        });
 	                    });
@@ -291,24 +291,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return token;
 	        }
 	    }, {
-	        key: '_reindexResources',
-	        value: function _reindexResources(index, resources) {
+	        key: '_reindexItems',
+	        value: function _reindexItems(index, items) {
 	            var that = this;
 	            return that.action('indexing', function (intent) {
 	                that._setIndexingPipeline(index);
 	                var fields = that.indexFields;
 	                var event = {
-	                    resources: resources,
-	                    len: resources.length,
+	                    items: items,
+	                    len: items.length,
 	                    pos: 0
 	                };
-	                resources.forEach(function (resource, key) {
+	                items.forEach(function (item, key) {
 	                    var indexEntry = {
-	                        _id: resource.id
+	                        _id: item.id
 	                    };
 	                    for (var field in fields) {
 	                        var fieldInfo = fields[field];
-	                        var value = resource.get(field);
+	                        var value = item.get(field);
 	                        indexEntry[field] = that._mergeValues(value, ' ');
 	                    }
 	                    index.lunr.add(indexEntry);
@@ -321,12 +321,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: '_filterSearchResult',
-	        value: function _filterSearchResult(resources) {
-	            var filter = this.resourceFilter;
+	        value: function _filterSearchResult(items) {
+	            var filter = this.dataFilter;
 	            if (filter) {
-	                resources = filter.apply(this, resources);
+	                items = filter.apply(this, items);
 	            }
-	            return resources;
+	            return items;
 	        }
 	    }, {
 	        key: '_mergeValues',
@@ -356,15 +356,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this.search(query);
 	        }
 	    }, {
-	        key: 'resourceFilter',
+	        key: 'dataFilter',
 
 	        // ----------------------------------------------------------------------
 
 	        get: function () {
-	            return this._resourceFilter;
+	            return this._dataFilter;
 	        },
 	        set: function (filter) {
-	            return this.setResourceFilter(filter);
+	            return this.setDataFilter(filter);
 	        }
 	    }, {
 	        key: 'indexFields',
