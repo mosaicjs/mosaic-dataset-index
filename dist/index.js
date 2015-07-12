@@ -83,7 +83,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -118,17 +118,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var DataSetIndex = (function (_DerivativeDataSet) {
+	    _inherits(DataSetIndex, _DerivativeDataSet);
+
 	    function DataSetIndex() {
+	        _classCallCheck(this, DataSetIndex);
+
 	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	        }
 
-	        _classCallCheck(this, DataSetIndex);
-
 	        _get(Object.getPrototypeOf(DataSetIndex.prototype), 'constructor', this).apply(this, args);
 	    }
-
-	    _inherits(DataSetIndex, _DerivativeDataSet);
 
 	    _createClass(DataSetIndex, [{
 	        key: 'search',
@@ -349,10 +349,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // ----------------------------------------------------------------------
 
-	        get: function () {
+	        get: function get() {
 	            return this._query || {};
 	        },
-	        set: function (query) {
+	        set: function set(query) {
 	            return this.search(query);
 	        }
 	    }, {
@@ -360,10 +360,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // ----------------------------------------------------------------------
 
-	        get: function () {
+	        get: function get() {
 	            return this._dataFilter;
 	        },
-	        set: function (filter) {
+	        set: function set(filter) {
 	            return this.setDataFilter(filter);
 	        }
 	    }, {
@@ -374,7 +374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Returns all fields to index with their respective type and boost factors.
 	         */
-	        get: function () {
+	        get: function get() {
 	            this._fields = this._fields || this.options.fields;
 	            if (!this._fields) {
 	                this._fields = {
@@ -405,7 +405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return this._fields;
 	        },
-	        set: function (fields) {
+	        set: function set(fields) {
 	            return this.setIndexFields(fields);
 	        }
 	    }], [{
@@ -500,7 +500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
-	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.10
+	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.11
 	 * Copyright (C) 2015 Oliver Nightingale
 	 * MIT Licensed
 	 * @license
@@ -508,7 +508,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 
-	(function () {
+	;(function () {
 
 	  /**
 	   * Convenience function for instantiating a new lunr index and configuring it
@@ -555,7 +555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return idx;
 	  };
 
-	  lunr.version = "0.5.10";
+	  lunr.version = "0.5.11";
 	  /*!
 	   * lunr.utils
 	   * Copyright (C) 2015 Oliver Nightingale
