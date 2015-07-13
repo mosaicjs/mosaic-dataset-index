@@ -33,8 +33,8 @@
   "dependencies": {
     "lunr": "^0.5.11",
     "mosaic-adapters": "^0.2.4",
-    "mosaic-dataset": "^0.1.0",
-    "mosaic-intents": "^0.2.0",
+    "mosaic-dataset": "^0.1.1",
+    "mosaic-intents": "^0.2.1",
     "promise": "^7.0.3"
   }
 }
