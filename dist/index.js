@@ -101,7 +101,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	_lunr2['default'].utils.warn = function (msg) {};
+	_lunr2['default'].utils.warn = function (msg) {
+	    // Silently ignore messages
+	};
 	// Change the default tokenizer
 	_lunr2['default'].tokenizer = function (obj) {
 	    var result = [];
@@ -130,27 +132,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(DataSetIndex.prototype), 'constructor', this).apply(this, args);
 	    }
 
+	    // ----------------------------------------------------------------------
+
 	    _createClass(DataSetIndex, [{
 	        key: 'search',
 	        value: function search(query) {
 	            return this.updateSearchParams({ query: query });
 	        }
+
+	        // ----------------------------------------------------------------------
+
 	    }, {
 	        key: 'setDataFilter',
 	        value: function setDataFilter(filter) {
 	            return this.updateSearchParams({ filter: filter });
 	        }
+
+	        // ----------------------------------------------------------------------
+
+	        /**
+	         * Returns all fields to index with their respective type and boost factors.
+	         */
 	    }, {
 	        key: 'setIndexFields',
 	        value: function setIndexFields(fields) {
 	            return this.updateSearchParams({ fields: fields });
 	        }
-	    }, {
-	        key: 'updateSearchParams',
 
 	        /**
 	         * Updates parameters influencing search results.
 	         */
+	    }, {
+	        key: 'updateSearchParams',
 	        value: function updateSearchParams(params, force) {
 	            var that = this;
 	            function setParam(field, key) {
@@ -176,12 +189,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 	        }
-	    }, {
-	        key: '_onMainDataSetUpdate',
 
 	        // ----------------------------------------------------------------------
 
 	        /** Updates the list */
+	    }, {
+	        key: '_onMainDataSetUpdate',
 	        value: function _onMainDataSetUpdate(intent) {
 	            var that = this;
 	            return intent.after(function () {
@@ -207,10 +220,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            });
 	        }
-	    }, {
-	        key: '_getLunrIndex',
 
 	        /** Builds and returns a full-text search index. */
+	    }, {
+	        key: '_getLunrIndex',
 	        value: function _getLunrIndex() {
 	            var _this = this;
 
@@ -345,11 +358,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _filterText(val) {
 	            return val ? '' + val : '';
 	        }
+
+	        // ---------------------------------------------------------------------
+	        // Token filters
+
+	        /** Filtering of empty words */
 	    }, {
 	        key: 'query',
-
-	        // ----------------------------------------------------------------------
-
 	        get: function get() {
 	            return this._query || {};
 	        },
@@ -358,9 +373,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: 'dataFilter',
-
-	        // ----------------------------------------------------------------------
-
 	        get: function get() {
 	            return this._dataFilter;
 	        },
@@ -369,38 +381,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: 'indexFields',
-
-	        // ----------------------------------------------------------------------
-
-	        /**
-	         * Returns all fields to index with their respective type and boost factors.
-	         */
 	        get: function get() {
 	            this._fields = this._fields || this.options.fields;
 	            if (!this._fields) {
 	                this._fields = {
-	                    'properties.name': {
-	                        'boost': 10
+	                    "properties.name": {
+	                        "boost": 10
 	                    },
-	                    'properties.description': {
-	                        'boost': 5
+	                    "properties.description": {
+	                        "boost": 5
 	                    },
-	                    'properties.tags': {
-	                        'boost': 15,
-	                        'filter': true
+	                    "properties.tags": {
+	                        "boost": 15,
+	                        "filter": true
 	                    },
-	                    'properties.address': {
-	                        'boost': 1
+	                    "properties.address": {
+	                        "boost": 1
 	                    },
-	                    'properties.postcode': {
-	                        'boost': 1,
-	                        'filter': 'prefix'
+	                    "properties.postcode": {
+	                        "boost": 1,
+	                        "filter": "prefix"
 	                    },
-	                    'properties.city': {
-	                        'boost': 2
+	                    "properties.city": {
+	                        "boost": 2
 	                    },
-	                    'properties.url': {
-	                        'boost': 0.5
+	                    "properties.url": {
+	                        "boost": 0.5
 	                    }
 	                };
 	            }
@@ -411,25 +417,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }], [{
 	        key: 'emptyStopWordFilter',
-
-	        // ---------------------------------------------------------------------
-	        // Token filters
-
-	        /** Filtering of empty words */
 	        value: function emptyStopWordFilter(token) {
 	            var filter = DataSetIndex.emptyStopWordFilter;
 	            if (!filter.stopWords) {
 	                filter.stopWords = new _lunr2['default'].SortedSet();
 	                filter.stopWords.length = 1;
-	                filter.stopWords.elements = [''];
+	                filter.stopWords.elements = [""];
 	            }
 	            if (filter.stopWords.indexOf(token) === -1) return token;
 	            return token;
 	        }
-	    }, {
-	        key: 'numberFilters',
 
 	        // Filter numbers
+	    }, {
+	        key: 'numberFilters',
 	        value: function numberFilters(token) {
 	            if (!token.match(/^\d+$/gim)) return token;
 	        }
@@ -453,12 +454,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return filter.normalizer(token);
 	        }
-	    }, {
-	        key: 'getNormalizationFunction',
 
 	        // ---------------------------------------------------------------------
 
 	        /** Returns a function normalizing strings */
+	    }, {
+	        key: 'getNormalizationFunction',
 	        value: function getNormalizationFunction() {
 	            var repl = [];
 	            for (var i = 0; i < arguments.length; i++) {
@@ -487,8 +488,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports['default'] = DataSetIndex;
 	module.exports = exports['default'];
-
-	// Silently ignore messages
 
 /***/ },
 /* 2 */
@@ -740,7 +739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  lunr.Pipeline.registerFunction = function (fn, label) {
 	    if (label in this.registeredFunctions) {
-	      lunr.utils.warn("Overwriting existing registered function: " + label);
+	      lunr.utils.warn('Overwriting existing registered function: ' + label);
 	    }
 
 	    fn.label = label;
@@ -758,7 +757,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var isRegistered = fn.label && fn.label in this.registeredFunctions;
 
 	    if (!isRegistered) {
-	      lunr.utils.warn("Function is not registered with pipeline. This may cause problems when serialising the index.\n", fn);
+	      lunr.utils.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn);
 	    }
 	  };
 
@@ -782,7 +781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (fn) {
 	        pipeline.add(fn);
 	      } else {
-	        throw new Error("Cannot load un-registered function: " + fnName);
+	        throw new Error('Cannot load un-registered function: ' + fnName);
 	      }
 	    });
 
@@ -821,7 +820,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var pos = this._stack.indexOf(existingFn);
 	    if (pos == -1) {
-	      throw new Error("Cannot find existingFn");
+	      throw new Error('Cannot find existingFn');
 	    }
 
 	    pos = pos + 1;
@@ -843,7 +842,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var pos = this._stack.indexOf(existingFn);
 	    if (pos == -1) {
-	      throw new Error("Cannot find existingFn");
+	      throw new Error('Cannot find existingFn');
 	    }
 
 	    this._stack.splice(pos, 0, newFn);
@@ -1303,7 +1302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  lunr.Index = function () {
 	    this._fields = [];
-	    this._ref = "id";
+	    this._ref = 'id';
 	    this.pipeline = new lunr.Pipeline();
 	    this.documentStore = new lunr.Store();
 	    this.tokenStore = new lunr.TokenStore();
@@ -1312,7 +1311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this._idfCache = {};
 
-	    this.on("add", "remove", "update", (function () {
+	    this.on('add', 'remove', 'update', (function () {
 	      this._idfCache = {};
 	    }).bind(this));
 	  };
@@ -1354,7 +1353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  lunr.Index.load = function (serialisedData) {
 	    if (serialisedData.version !== lunr.version) {
-	      lunr.utils.warn("version mismatch: current " + lunr.version + " importing " + serialisedData.version);
+	      lunr.utils.warn('version mismatch: current ' + lunr.version + ' importing ' + serialisedData.version);
 	    }
 
 	    var idx = new this();
@@ -1462,7 +1461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.tokenStore.add(token, { ref: docRef, tf: tf });
 	    };
 
-	    if (emitEvent) this.eventEmitter.emit("add", doc, this);
+	    if (emitEvent) this.eventEmitter.emit('add', doc, this);
 	  };
 
 	  /**
@@ -1497,7 +1496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.tokenStore.remove(token, docRef);
 	    }, this);
 
-	    if (emitEvent) this.eventEmitter.emit("remove", doc, this);
+	    if (emitEvent) this.eventEmitter.emit('remove', doc, this);
 	  };
 
 	  /**
@@ -1526,7 +1525,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.remove(doc, false);
 	    this.add(doc, false);
 
-	    if (emitEvent) this.eventEmitter.emit("update", doc, this);
+	    if (emitEvent) this.eventEmitter.emit('update', doc, this);
 	  };
 
 	  /**
@@ -2034,7 +2033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return porterStemmer;
 	  })();
 
-	  lunr.Pipeline.registerFunction(lunr.stemmer, "stemmer");
+	  lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer');
 	  /*!
 	   * lunr.stopWordFilter
 	   * Copyright (C) 2015 Oliver Nightingale
@@ -2060,7 +2059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  lunr.stopWordFilter.stopWords.length = 119;
 	  lunr.stopWordFilter.stopWords.elements = ["", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your"];
 
-	  lunr.Pipeline.registerFunction(lunr.stopWordFilter, "stopWordFilter");
+	  lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter');
 	  /*!
 	   * lunr.trimmer
 	   * Copyright (C) 2015 Oliver Nightingale
@@ -2081,10 +2080,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @see lunr.Pipeline
 	   */
 	  lunr.trimmer = function (token) {
-	    return token.replace(/^\W+/, "").replace(/\W+$/, "");
+	    return token.replace(/^\W+/, '').replace(/\W+$/, '');
 	  };
 
-	  lunr.Pipeline.registerFunction(lunr.trimmer, "trimmer");
+	  lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer');
 	  /*!
 	   * lunr.stemmer
 	   * Copyright (C) 2015 Oliver Nightingale
@@ -2256,7 +2255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (Object.keys(docs).length) memo.push(token);
 
 	    Object.keys(root).forEach(function (key) {
-	      if (key === "docs") return;
+	      if (key === 'docs') return;
 
 	      memo.concat(this.expand(token + key, memo));
 	    }, this);
@@ -2275,17 +2274,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      root: this.root,
 	      length: this.length
 	    };
-	  }
-
-	  /**
-	   * export the module via AMD, CommonJS or as a browser global
-	   * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
-	   */
-	  ;(function (root, factory) {
+	  };(function (root, factory) {
 	    if (true) {
 	      // AMD. Register as an anonymous module.
 	      !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	    } else if (typeof exports === "object") {
+	    } else if (typeof exports === 'object') {
 	      /**
 	       * Node. Does not work with strict CommonJS, but
 	       * only CommonJS-like enviroments that support module.exports,
@@ -2305,6 +2298,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return lunr;
 	  });
 	})();
+
+	/**
+	 * export the module via AMD, CommonJS or as a browser global
+	 * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
+	 */
 
 /***/ },
 /* 4 */
@@ -2633,8 +2631,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // - iPad Safari 4.3
 	    // - Lynx 2.8.7
 	} else {
-	    requestFlush = makeRequestCallFromTimer(flush);
-	}
+	        requestFlush = makeRequestCallFromTimer(flush);
+	    }
 
 	// `requestFlush` requests that the high priority event queue be flushed as
 	// soon as possible.

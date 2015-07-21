@@ -13,7 +13,7 @@ describe('DataSetIndex', function() {
         let dataSet = new DataSet({adapters});
         let index = dataSet.getAdapter(DataSetIndex);
         expect(!!index).to.be(true);
-        
+
         let started = false;
         let finished = false;
         let progress = [];
