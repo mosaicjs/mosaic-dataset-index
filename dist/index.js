@@ -312,6 +312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        indexEntry[field] = that._mergeValues(value, ' ');
 	                    }
 	                    index.lunr.add(indexEntry);
+	                    event.item = item;
 	                    event.pos++;
 	                    intent.emit('progress', event);
 	                });
