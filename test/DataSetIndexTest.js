@@ -59,4 +59,45 @@ describe('DataSetIndex', function() {
         })//
         .then(done, done);
     });
+    
+    it('should be able re-define indexing schema', function(done){
+        let dataSet = new DataSet({adapters});
+        let index = dataSet.getAdapter(DataSetIndex);
+        function testIndex(index, query, ...ids) {
+            return index.search(query).then(function(){
+                expect(index.length).to.eql(ids.length);
+                index.each(function(obj, pos){
+                    expect(obj.id).to.eql(ids[pos]);
+                });
+            });
+        }
+        Promise.resolve().then(function(){
+            return index.setIndexFields({
+                "label" : { boost : 1 },
+                "tags" : { boost : 1 },
+            }).then(function(){
+                const data = [
+                    {
+                        "id" : "entreprise",
+                        "label" : "Entreprises",
+                        "tags" : [ "ecommerce", "B2B", "marketplace", "santé", "éducation" ]
+                    },
+                    {
+                        "id" : "tiers-lieu",
+                        "label" : "Tiers-lieux",
+                        "tags" : ["fablab", "makerspace", "hackerspace", "coworking", "bureaux partagés", "télécentre" ]
+                    }
+                ];
+                dataSet.items = data;
+                return Promise.all([
+//                    testIndex(index, 'santé', 'entreprise'),
+//                    testIndex(index, 'éducation', 'entreprise'),
+                    testIndex(index, 'education', 'entreprise'),
+                    testIndex(index, 'tiers-lieu', 'tiers-lieu'),
+                    testIndex(index, 'partage', 'tiers-lieu')
+                ]);
+            });
+            
+        }).then(function(){}).then(done, done);
+    });
 });
