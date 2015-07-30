@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("mosaic-dataset"));
+		module.exports = factory(require("mosaic-dataset"), require("mosaic-adapters"));
 	else if(typeof define === 'function' && define.amd)
-		define(["mosaic-dataset"], factory);
+		define(["mosaic-dataset", "mosaic-adapters"], factory);
 	else {
-		var a = typeof exports === 'object' ? factory(require("mosaic-dataset")) : factory(root["mosaic-dataset"]);
+		var a = typeof exports === 'object' ? factory(require("mosaic-dataset"), require("mosaic-adapters")) : factory(root["mosaic-dataset"], root["mosaic-adapters"]);
 		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
 	}
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_15__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -66,8 +66,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _libDataSetIndex2 = _interopRequireDefault(_libDataSetIndex);
 
+	var _libSearchableDataSet = __webpack_require__(13);
+
+	var _libSearchableDataSet2 = _interopRequireDefault(_libSearchableDataSet);
+
+	var _libSearchCriteria = __webpack_require__(14);
+
+	var _libSearchCriteria2 = _interopRequireDefault(_libSearchCriteria);
+
+	var _libSearchCriteriaDataSet = __webpack_require__(16);
+
+	var _libSearchCriteriaDataSet2 = _interopRequireDefault(_libSearchCriteriaDataSet);
+
 	exports['default'] = {
-	    DataSetIndex: _libDataSetIndex2['default']
+	    DataSetIndex: _libDataSetIndex2['default'],
+	    SearchableDataSet: _libSearchableDataSet2['default'],
+	    SearchCriteria: _libSearchCriteria2['default'],
+	    SearchCriteriaDataSet: _libSearchCriteriaDataSet2['default']
 	};
 	module.exports = exports['default'];
 
@@ -111,7 +126,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (Array.isArray(obj)) return result = obj.map(function (t) {
 	        return t.toLowerCase();
 	    });
-	    return result = obj.toString().trim().toLowerCase().split(/[\(\)\s\-\.\/\/\'\’\"]+/);
+	    result = obj.toString().trim().toLowerCase().split(/[\(\)\s\-\.\/\/\'\’\"]+/);
+	    return result;
 	};
 
 	/**
@@ -122,14 +138,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DataSetIndex = (function (_DerivativeDataSet) {
 	    _inherits(DataSetIndex, _DerivativeDataSet);
 
-	    function DataSetIndex() {
+	    function DataSetIndex(options) {
+	        var _get2;
+
 	        _classCallCheck(this, DataSetIndex);
 
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	            args[_key] = arguments[_key];
+	        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	            args[_key - 1] = arguments[_key];
 	        }
 
-	        _get(Object.getPrototypeOf(DataSetIndex.prototype), 'constructor', this).apply(this, args);
+	        (_get2 = _get(Object.getPrototypeOf(DataSetIndex.prototype), 'constructor', this)).call.apply(_get2, [this, options].concat(args));
+	        this.indexFields = this.options.fields;
 	    }
 
 	    // ----------------------------------------------------------------------
@@ -167,25 +186,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function updateSearchParams(params, force) {
 	            var that = this;
 	            function setParam(field, key) {
-	                var updated = force;
+	                var updated = !!force;
 	                if (key in params) {
 	                    var value = params[key] || '';
 	                    var prevValue = that[field];
-	                    updated |= prevValue !== value;
+	                    updated = prevValue !== value || updated;
 	                    that[field] = value;
 	                }
 	                return updated;
 	            }
-	            return this.action('params', function (intent) {
-	                var updated = setParam('_query', 'query');
-	                updated |= setParam('_dataFilter', 'filter');
-	                updated |= setParam('_fields', 'fields');
-	                if (updated) {
-	                    return this._runSearch().then(function () {
-	                        return true;
-	                    });
+	            return this.action('params', { index: this }, function (intent) {
+	                var queryUpdated = setParam('_query', 'query');
+	                queryUpdated |= setParam('_dataFilter', 'filter');
+	                var schemaUpdated = setParam('_fields', 'fields');
+	                if (queryUpdated || schemaUpdated) {
+	                    if (schemaUpdated && this._reindexed) {
+	                        delete this._indexPromise;
+	                    }
+	                    return this._runSearch();
 	                } else {
-	                    return false;
+	                    return this.items;
 	                }
 	            });
 	        }
@@ -205,18 +225,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: '_runSearch',
 	        value: function _runSearch() {
 	            var that = this;
-	            return this.action('search', function (intent) {
-	                return that._getLunrIndex().then(function (index) {
-	                    var entries = that._scores = index.lunr.search(that._query);
-	                    var dataSet = that.dataSet;
-	                    var list = [];
-	                    entries.forEach(function (entry) {
-	                        var r = dataSet.byId(entry.ref);
-	                        if (!r) return;
-	                        list.push(r);
+	            if (!that._searchPromise) {
+	                that._searchPromise = _promise2['default'].resolve();
+	            }
+	            return that._searchPromise = that._searchPromise.then(function () {
+	                return that.action('search', { index: this }, function (intent) {
+	                    return that._getLunrIndex().then(function (index) {
+	                        var list = [];
+	                        var dataSet = that.dataSet;
+	                        if (!that._query) {
+	                            list = dataSet.items;
+	                        } else {
+	                            var entries = index.lunr.search(that._query);
+	                            entries.forEach(function (entry) {
+	                                var r = dataSet.byId(entry.ref);
+	                                if (!r) return;
+	                                list.push(r);
+	                            });
+	                        }
+	                        list = that._filterSearchResult(list);
+	                        return that.setItems(list).then(function () {
+	                            return that.items;
+	                        });
 	                    });
-	                    list = that._filterSearchResult(list);
-	                    return that.setItems(list);
 	                });
 	            });
 	        }
@@ -227,35 +258,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getLunrIndex() {
 	            var _this = this;
 
-	            if (this.parentVersion !== this.dataSet.version) {
+	            if (this.parentVersion !== this.dataSet.version && this._reindexed) {
 	                delete this._indexPromise;
 	            }
 	            if (!this._indexPromise) {
 	                (function () {
+	                    _this._reindexed = false;
 	                    _this.parentVersion = _this.dataSet.version;
 	                    var that = _this;
 	                    that._indexPromise = new _promise2['default'](function (resolve, reject) {
 	                        try {
-	                            (function () {
-	                                var index = {};
-	                                (0, _lunr2['default'])(function (lunr) {
-	                                    index.lunr = lunr;
-	                                    lunr.ref('_id', {
-	                                        boost: 1
-	                                    });
-	                                    var fields = that.indexFields;
-	                                    for (var field in fields) {
-	                                        var info = fields[field];
-	                                        info = info || {};
-	                                        var boost = info.boost || 1;
-	                                        var type = info.type || 'field';
-	                                        lunr[type](field, {
-	                                            boost: boost
-	                                        });
-	                                    }
-	                                });
-	                                resolve(index);
-	                            })();
+	                            var index = {
+	                                refs: {},
+	                                lunr: new _lunr2['default'].Index()
+	                            };
+	                            var lunr = index.lunr;
+	                            lunr.ref('_id', {
+	                                boost: 1
+	                            });
+	                            var fields = that.indexFields;
+	                            for (var field in fields) {
+	                                var info = fields[field];
+	                                info = info || {};
+	                                info.boost = info.boost || 1;
+	                                var type = info.type || 'field';
+	                                lunr[type](field, info);
+	                            }
+	                            resolve(index);
 	                        } catch (err) {
 	                            delete that._indexPromise;
 	                            reject(err);
@@ -263,6 +292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }).then(function (index) {
 	                        var items = that.dataSet.items;
 	                        return that._reindexItems(index, items).then(function () {
+	                            that._reindexed = true;
 	                            return index;
 	                        });
 	                    });
@@ -277,7 +307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            index.lunr.pipeline.add(this._filterToken.bind(this, [//
 	            // DataSetIndex.numberFilters, //
 	            DataSetIndex.normalizeText, //
-	            _lunr2['default'].stemmer, //
+	            // Lunr.stemmer, //
 	            // Lunr.trimmer, //
 	            // Lunr.stopWordFilter, //
 	            DataSetIndex.emptyStopWordFilter //
@@ -286,17 +316,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_setSearchPipeline',
 	        value: function _setSearchPipeline(index) {
-	            // Disable token registration
 	            index.lunr.pipeline.reset();
 	            index.lunr.pipeline.add(this._filterToken.bind(this, [//
 	            DataSetIndex.normalizeText, //
-	            _lunr2['default'].stemmer, //
+	            // Lunr.stemmer, //
 	            DataSetIndex.emptyStopWordFilter //
 	            ]));
 	        }
 	    }, {
 	        key: '_filterToken',
 	        value: function _filterToken(filters, token) {
+	            var before = token;
 	            for (var i = 0; i < filters.length; i++) {
 	                token = filters[i](token);
 	                if (!token) return;
@@ -307,30 +337,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: '_reindexItems',
 	        value: function _reindexItems(index, items) {
 	            var that = this;
-	            return that.action('indexing', function (intent) {
+	            return that.action('indexing', { index: this }, function (intent) {
 	                that._setIndexingPipeline(index);
 	                var fields = that.indexFields;
 	                var event = {
+	                    index: that,
 	                    items: items,
 	                    len: items.length,
 	                    pos: 0
 	                };
-	                items.forEach(function (item, key) {
-	                    var indexEntry = {
-	                        _id: item.id
-	                    };
-	                    for (var field in fields) {
-	                        var fieldInfo = fields[field];
-	                        var value = item.get(field);
-	                        indexEntry[field] = that._mergeValues(value, ' ');
+	                function indexChunk(chunk, timeout) {
+	                    return new _promise2['default'](function (resolve, reject) {
+	                        setTimeout(function () {
+	                            try {
+	                                chunk.forEach(function (item, key) {
+	                                    var indexEntry = {
+	                                        _id: item.id
+	                                    };
+	                                    for (var field in fields) {
+	                                        var fieldInfo = fields[field];
+	                                        var value = item.get(field);
+	                                        indexEntry[field] = that._mergeValues(value, ' ');
+	                                    }
+	                                    index.lunr.add(indexEntry);
+	                                    event.item = item;
+	                                    event.pos++;
+	                                    intent.emit('progress', event);
+	                                });
+	                                resolve();
+	                            } catch (err) {
+	                                reject(err);
+	                            }
+	                        }, 10);
+	                    });
+	                }
+	                var chunk = [];
+	                var blockSize = 100;
+	                var promises = [];
+	                for (var i = 0, len = items.length; i < len; i++) {
+	                    chunk.push(items[i]);
+	                    if (chunk.length % blockSize === 0) {
+	                        promises.push(indexChunk(chunk, 10));
+	                        chunk = [];
 	                    }
-	                    index.lunr.add(indexEntry);
-	                    event.item = item;
-	                    event.pos++;
-	                    intent.emit('progress', event);
+	                }
+	                if (chunk.length) {
+	                    promises.push(indexChunk(chunk, 10));
+	                }
+	                return _promise2['default'].all(promises).then(function () {
+	                    that._setSearchPipeline(index);
+	                    return true;
 	                });
-	                that._setSearchPipeline(index);
-	                return true;
 	            });
 	        }
 	    }, {
@@ -338,7 +395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _filterSearchResult(items) {
 	            var filter = this.dataFilter;
 	            if (filter) {
-	                items = filter.apply(this, items);
+	                items = filter.call(this, items);
 	            }
 	            return items;
 	        }
@@ -473,6 +530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return function (str) {
 	                if (!str || str == '') return '';
+	                var before = str;
 	                str = str + '';
 	                for (var i = 0; i < repl.length; i++) {
 	                    var slot = repl[i];
@@ -3035,6 +3093,317 @@ return /******/ (function(modules) { // webpackBootstrap
 	        freeTasks[freeTasks.length] = this;
 	    }
 	};
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _promise = __webpack_require__(4);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
+	var _DataSetIndex = __webpack_require__(1);
+
+	var _DataSetIndex2 = _interopRequireDefault(_DataSetIndex);
+
+	var _mosaicDataset = __webpack_require__(2);
+
+	var SearchableDataSet = (function (_DataSet) {
+	    _inherits(SearchableDataSet, _DataSet);
+
+	    function SearchableDataSet() {
+	        _classCallCheck(this, SearchableDataSet);
+
+	        for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+	            params[_key] = arguments[_key];
+	        }
+
+	        _get(Object.getPrototypeOf(SearchableDataSet.prototype), 'constructor', this).apply(this, params);
+	        this.indexes = {};
+	        var dataSet = this.options.dataSet;
+	        this._onIndexing = this._onIndexing.bind(this);
+	        var indexFields = this.options.indexFields;
+	        for (var key in indexFields) {
+	            var fields = indexFields[key];
+	            var index = new _DataSetIndex2['default']({ dataSet: dataSet, fields: fields });
+	            index.addListener('indexing', this._onIndexing);
+	            index.indexKey = key;
+	            this.indexes[key] = index;
+	        }
+	    }
+
+	    _createClass(SearchableDataSet, [{
+	        key: 'close',
+	        value: function close() {
+	            for (var key in this._indexes) {
+	                var index = this._indexes[key];
+	                index.removeListener('indexing', this._onIndexing);
+	            }
+	            this._indexes = {};
+	            return _get(Object.getPrototypeOf(SearchableDataSet.prototype), 'close', this).call(this);
+	        }
+	    }, {
+	        key: 'search',
+	        value: function search(queries) {
+	            var that = this;
+	            return this.action('search', function (intent) {
+	                var indexes = [];
+	                var promises = [];
+	                for (var type in that.indexes) {
+	                    var query = queries[type] || '';
+	                    if (Array.isArray(query)) {
+	                        query = query.join(' ');
+	                    }
+	                    var index = that.indexes[type];
+	                    if (index) {
+	                        indexes.push(index);
+	                        promises.push(index.search(query).promise);
+	                    }
+	                }
+	                return _promise2['default'].all(promises).then(function () {
+	                    return _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, indexes);
+	                }).then(function (items) {
+	                    return that.setItems(items);
+	                });
+	            });
+	        }
+	    }, {
+	        key: '_createSingletonIntent',
+	        value: function _createSingletonIntent(key, params, method) {
+	            var that = this;
+	            var internalIntent = that.intent(key, params);
+	            var counter = 0;
+	            function finalize() {
+	                counter--;
+	                if (counter == 0) {
+	                    internalIntent.resolve();
+	                }
+	            }
+	            internalIntent.handle = function (intent) {
+	                counter++;
+	                intent.then(finalize, finalize);
+	                return method(intent);
+	            };
+	            return internalIntent;
+	        }
+	    }, {
+	        key: '_onIndexing',
+	        value: function _onIndexing(intent) {
+	            var that = this;
+	            if (!that._indexingIntent) {
+	                var finalize = function finalize() {
+	                    delete that._indexingIntent;
+	                };
+
+	                that._indexingIntent = that._createSingletonIntent('indexing', {}, function (intent) {
+	                    intent.addListener('progress', function (event) {
+	                        event.indexKey = event.index.indexKey;
+	                        that._indexingIntent.emit('progress', event);
+	                    });
+	                });
+
+	                that._indexingIntent.then(finalize, finalize);
+	            }
+	            that._indexingIntent.handle(intent);
+	        }
+	    }]);
+
+	    return SearchableDataSet;
+	})(_mosaicDataset.DataSet);
+
+	exports['default'] = SearchableDataSet;
+	module.exports = exports['default'];
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _mosaicDataset = __webpack_require__(2);
+
+	var _mosaicAdapters = __webpack_require__(15);
+
+	/**
+	 * Instances of this type are used as containers for search criteria.
+	 */
+
+	var SearchCriteria = (function (_Data) {
+	  _inherits(SearchCriteria, _Data);
+
+	  function SearchCriteria(options) {
+	    var _get2;
+
+	    _classCallCheck(this, SearchCriteria);
+
+	    for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	      params[_key - 1] = arguments[_key];
+	    }
+
+	    (_get2 = _get(Object.getPrototypeOf(SearchCriteria.prototype), 'constructor', this)).call.apply(_get2, [this, options].concat(params));
+	  }
+
+	  /**
+	   * Returns values of search criteria.
+	   */
+
+	  _createClass(SearchCriteria, [{
+	    key: 'values',
+	    get: function get() {
+	      var values = this.get('values') || [];
+	      if (!Array.isArray(values)) {
+	        values = [values];
+	      }
+	      return values;
+	    }
+
+	    /**
+	     * Returns the key of this search criteria. This key is used to select the
+	     * index where this search criteria should be applied. (see the
+	     * SearchableDataSet class)
+	     */
+	  }, {
+	    key: 'indexKey',
+	    get: function get() {
+	      return this.get('key') || 'full';
+	    }
+
+	    /**
+	     * Returns a human-readable label for this search criteria.
+	     */
+	  }, {
+	    key: 'label',
+	    get: function get() {
+	      return this.get('label') || this.values.join('; ');
+	    }
+	  }]);
+
+	  return SearchCriteria;
+	})(_mosaicDataset.Data);
+
+	exports['default'] = SearchCriteria;
+	module.exports = exports['default'];
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_15__;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _mosaicDataset = __webpack_require__(2);
+
+	var _SearchCriteria = __webpack_require__(14);
+
+	/**
+	 * Container for search criteria.
+	 */
+
+	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
+
+	var SearchCriteriaDataSet = (function (_DataSet) {
+	    _inherits(SearchCriteriaDataSet, _DataSet);
+
+	    function SearchCriteriaDataSet(options) {
+	        var _get2;
+
+	        _classCallCheck(this, SearchCriteriaDataSet);
+
+	        options = options || {};
+	        if (!options.DataType) {
+	            options.DataType = _SearchCriteria2['default'];
+	        }
+
+	        for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	            params[_key - 1] = arguments[_key];
+	        }
+
+	        (_get2 = _get(Object.getPrototypeOf(SearchCriteriaDataSet.prototype), 'constructor', this)).call.apply(_get2, [this, options].concat(params));
+	    }
+
+	    /**
+	     * Returns a search criteria to apply to the SearchableDataSet index set.
+	     */
+
+	    _createClass(SearchCriteriaDataSet, [{
+	        key: 'getQuery',
+	        value: function getQuery() {
+	            return SearchCriteriaDataSet.getQuery(this);
+	        }
+	    }, {
+	        key: 'query',
+	        get: function get() {
+	            return this.getQuery();
+	        }
+	    }], [{
+	        key: 'getQuery',
+	        value: function getQuery(set) {
+	            var result = {};
+	            set.forEach(function (item) {
+	                var key = item.indexKey || 'full';
+	                var values = item.values;
+	                if (!key || !values) return;
+	                var array = result[key] = result[key] || [];
+	                values.forEach(function (val) {
+	                    array.push(val);
+	                });
+	            });
+	            return result;
+	        }
+	    }]);
+
+	    return SearchCriteriaDataSet;
+	})(_mosaicDataset.DataSet);
+
+	exports['default'] = SearchCriteriaDataSet;
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ])

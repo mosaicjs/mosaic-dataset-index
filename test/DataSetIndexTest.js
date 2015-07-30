@@ -64,11 +64,12 @@ describe('DataSetIndex', function() {
         let dataSet = new DataSet({adapters});
         let index = dataSet.getAdapter(DataSetIndex);
         function testIndex(index, query, ...ids) {
-            return index.search(query).then(function(){
-                expect(index.length).to.eql(ids.length);
-                index.each(function(obj, pos){
+            return index.search(query).then(function(items){
+                expect(items.length).to.eql(ids.length);
+                items.forEach(function(obj, pos){
                     expect(obj.id).to.eql(ids[pos]);
                 });
+                expect(index.items).to.eql(items);
             });
         }
         Promise.resolve().then(function(){
@@ -89,13 +90,21 @@ describe('DataSetIndex', function() {
                     }
                 ];
                 dataSet.items = data;
-                return Promise.all([
-//                    testIndex(index, 'santé', 'entreprise'),
-//                    testIndex(index, 'éducation', 'entreprise'),
-                    testIndex(index, 'education', 'entreprise'),
-                    testIndex(index, 'tiers-lieu', 'tiers-lieu'),
-                    testIndex(index, 'partage', 'tiers-lieu')
-                ]);
+                let values = [
+                    ['santé', 'entreprise'],
+                    ['éducation', 'entreprise'],
+                    ['education', 'entreprise'],
+                    ['tiers-lieu', 'tiers-lieu'],
+                    ['partage', 'tiers-lieu']
+                ];
+
+                let promise = Promise.resolve();
+                values.forEach(function(pair){
+                    promise = promise.then(function(){
+                        return testIndex(index, pair[0], pair[1]);
+                    })
+                });
+                return promise;
             });
             
         }).then(function(){}).then(done, done);
