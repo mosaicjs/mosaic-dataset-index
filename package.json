@@ -1,6 +1,6 @@
 {
   "name": "mosaic-dataset-index",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Lunr-based full-text index for DataSets.",
   "main": "index.js",
   "scripts": {
@@ -31,10 +31,10 @@
     "webpack": "^1.10.1"
   },
   "dependencies": {
-    "lunr": "^0.5.11",
-    "mosaic-adapters": "^0.2.4",
-    "mosaic-dataset": "^0.1.10",
-    "mosaic-intents": "^0.2.6",
-    "promise": "^7.0.3"
+    "lunr": "^0.5.12",
+    "mosaic-adapters": "^0.2.5",
+    "mosaic-dataset": "^0.1.12",
+    "mosaic-intents": "^0.2.7",
+    "promise": "^7.0.4"
   }
 }

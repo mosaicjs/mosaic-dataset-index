@@ -131,7 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * This adapters automatically re-indexes all data object in the parent data
+	 * This adapters automatically re-indexes all data object in a specified data
 	 * set.
 	 */
 
@@ -154,9 +154,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // ----------------------------------------------------------------------
 
 	    _createClass(DataSetIndex, [{
-	        key: 'search',
-	        value: function search(query) {
-	            return this.updateSearchParams({ query: query });
+	        key: 'initSearch',
+	        value: function initSearch(query, dataSet) {
+	            if (dataSet === undefined) {
+	                dataSet = query;
+	                query = dataSet.query;
+	            }
+	            var that = this;
+	            if (!dataSet._indexUpdateListener) {
+	                dataSet._indexUpdateListener = function (intent) {
+	                    intent.then(function () {
+	                        return that.search(query, dataSet);
+	                    });
+	                };
+	            }
+	            this.addListener('indexing', dataSet._indexUpdateListener);
+	        }
+	    }, {
+	        key: 'doneSearch',
+	        value: function doneSearch(dataSet) {
+	            if (dataSet._indexUpdateListener) {
+	                this.removeListener('indexing', dataSet._indexUpdateListener);
+	                delete dataSet._indexUpdateListener;
+	            }
 	        }
 
 	        // ----------------------------------------------------------------------
@@ -164,7 +184,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'setDataFilter',
 	        value: function setDataFilter(filter) {
-	            return this.updateSearchParams({ filter: filter });
+	            var that = this;
+	            return this.action('update', { index: that }, function (intent) {
+	                var updated = filter !== that._filter;
+	                that._filter = filter;
+	                return updated;
+	            });
 	        }
 
 	        // ----------------------------------------------------------------------
@@ -175,38 +200,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'setIndexFields',
 	        value: function setIndexFields(fields) {
-	            return this.updateSearchParams({ fields: fields });
-	        }
-
-	        /**
-	         * Updates parameters influencing search results.
-	         */
-	    }, {
-	        key: 'updateSearchParams',
-	        value: function updateSearchParams(params, force) {
 	            var that = this;
-	            function setParam(field, key) {
-	                var updated = !!force;
-	                if (key in params) {
-	                    var value = params[key] || '';
-	                    var prevValue = that[field];
-	                    updated = prevValue !== value || updated;
-	                    that[field] = value;
+	            return that.action('update', { index: that }, function (intent) {
+	                var updated = fields !== that._fields;
+	                that._fields = fields;
+	                if (updated) {
+	                    delete that._indexPromise;
 	                }
 	                return updated;
+	            });
+	        }
+
+	        // ----------------------------------------------------------------------
+
+	    }, {
+	        key: 'search',
+	        value: function search(query, resultSet) {
+	            var that = this;
+	            if (!resultSet) {
+	                resultSet = new _mosaicDataset.DataSet({ adapters: this.adapters });
 	            }
-	            return this.action('params', { index: this }, function (intent) {
-	                var queryUpdated = setParam('_query', 'query');
-	                queryUpdated |= setParam('_dataFilter', 'filter');
-	                var schemaUpdated = setParam('_fields', 'fields');
-	                if (queryUpdated || schemaUpdated) {
-	                    if (schemaUpdated && this._reindexed) {
-	                        delete this._indexPromise;
-	                    }
-	                    return this._runSearch();
+	            return that._getLunrIndex().then(function (index) {
+	                var list = [];
+	                var dataSet = that.dataSet;
+	                if (!query) {
+	                    list = list.concat(dataSet.items);
 	                } else {
-	                    return this.items;
+	                    var entries = index.lunr.search(query);
+	                    entries.forEach(function (entry) {
+	                        var r = dataSet.byId(entry.ref);
+	                        if (!r) return;
+	                        list.push(r);
+	                    });
 	                }
+	                list = that._filterSearchResult(list);
+	                resultSet.query = query;
+	                return resultSet.setItems(list).then(function () {
+	                    return resultSet;
+	                });
 	            });
 	        }
 
@@ -218,37 +249,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _onMainDataSetUpdate(intent) {
 	            var that = this;
 	            return intent.after(function () {
-	                return that._runSearch();
-	            });
-	        }
-	    }, {
-	        key: '_runSearch',
-	        value: function _runSearch() {
-	            var that = this;
-	            if (!that._searchPromise) {
-	                that._searchPromise = _promise2['default'].resolve();
-	            }
-	            return that._searchPromise = that._searchPromise.then(function () {
-	                return that.action('search', { index: this }, function (intent) {
-	                    return that._getLunrIndex().then(function (index) {
-	                        var list = [];
-	                        var dataSet = that.dataSet;
-	                        if (!that._query) {
-	                            list = dataSet.items;
-	                        } else {
-	                            var entries = index.lunr.search(that._query);
-	                            entries.forEach(function (entry) {
-	                                var r = dataSet.byId(entry.ref);
-	                                if (!r) return;
-	                                list.push(r);
-	                            });
-	                        }
-	                        list = that._filterSearchResult(list);
-	                        return that.setItems(list).then(function () {
-	                            return that.items;
-	                        });
-	                    });
-	                });
+	                delete that._indexPromise;
+	                return that._getLunrIndex();
 	            });
 	        }
 
@@ -421,14 +423,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /** Filtering of empty words */
 	    }, {
-	        key: 'query',
-	        get: function get() {
-	            return this._query || {};
-	        },
-	        set: function set(query) {
-	            return this.search(query);
-	        }
-	    }, {
 	        key: 'dataFilter',
 	        get: function get() {
 	            return this._dataFilter;
@@ -479,7 +473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!filter.stopWords) {
 	                filter.stopWords = new _lunr2['default'].SortedSet();
 	                filter.stopWords.length = 1;
-	                filter.stopWords.elements = [""];
+	                filter.stopWords.elements = [];
 	            }
 	            if (filter.stopWords.indexOf(token) === -1) return token;
 	            return token;
@@ -558,7 +552,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
-	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.11
+	 * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.12
 	 * Copyright (C) 2015 Oliver Nightingale
 	 * MIT Licensed
 	 * @license
@@ -613,7 +607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return idx;
 	  };
 
-	  lunr.version = "0.5.11";
+	  lunr.version = "0.5.12";
 	  /*!
 	   * lunr.utils
 	   * Copyright (C) 2015 Oliver Nightingale
@@ -2110,12 +2104,130 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @see lunr.Pipeline
 	   */
 	  lunr.stopWordFilter = function (token) {
-	    if (lunr.stopWordFilter.stopWords.indexOf(token) === -1) return token;
+	    if (token && lunr.stopWordFilter.stopWords[token] !== token) return token;
 	  };
 
-	  lunr.stopWordFilter.stopWords = new lunr.SortedSet();
-	  lunr.stopWordFilter.stopWords.length = 119;
-	  lunr.stopWordFilter.stopWords.elements = ["", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your"];
+	  lunr.stopWordFilter.stopWords = {
+	    'a': 'a',
+	    'able': 'able',
+	    'about': 'about',
+	    'across': 'across',
+	    'after': 'after',
+	    'all': 'all',
+	    'almost': 'almost',
+	    'also': 'also',
+	    'am': 'am',
+	    'among': 'among',
+	    'an': 'an',
+	    'and': 'and',
+	    'any': 'any',
+	    'are': 'are',
+	    'as': 'as',
+	    'at': 'at',
+	    'be': 'be',
+	    'because': 'because',
+	    'been': 'been',
+	    'but': 'but',
+	    'by': 'by',
+	    'can': 'can',
+	    'cannot': 'cannot',
+	    'could': 'could',
+	    'dear': 'dear',
+	    'did': 'did',
+	    'do': 'do',
+	    'does': 'does',
+	    'either': 'either',
+	    'else': 'else',
+	    'ever': 'ever',
+	    'every': 'every',
+	    'for': 'for',
+	    'from': 'from',
+	    'get': 'get',
+	    'got': 'got',
+	    'had': 'had',
+	    'has': 'has',
+	    'have': 'have',
+	    'he': 'he',
+	    'her': 'her',
+	    'hers': 'hers',
+	    'him': 'him',
+	    'his': 'his',
+	    'how': 'how',
+	    'however': 'however',
+	    'i': 'i',
+	    'if': 'if',
+	    'in': 'in',
+	    'into': 'into',
+	    'is': 'is',
+	    'it': 'it',
+	    'its': 'its',
+	    'just': 'just',
+	    'least': 'least',
+	    'let': 'let',
+	    'like': 'like',
+	    'likely': 'likely',
+	    'may': 'may',
+	    'me': 'me',
+	    'might': 'might',
+	    'most': 'most',
+	    'must': 'must',
+	    'my': 'my',
+	    'neither': 'neither',
+	    'no': 'no',
+	    'nor': 'nor',
+	    'not': 'not',
+	    'of': 'of',
+	    'off': 'off',
+	    'often': 'often',
+	    'on': 'on',
+	    'only': 'only',
+	    'or': 'or',
+	    'other': 'other',
+	    'our': 'our',
+	    'own': 'own',
+	    'rather': 'rather',
+	    'said': 'said',
+	    'say': 'say',
+	    'says': 'says',
+	    'she': 'she',
+	    'should': 'should',
+	    'since': 'since',
+	    'so': 'so',
+	    'some': 'some',
+	    'than': 'than',
+	    'that': 'that',
+	    'the': 'the',
+	    'their': 'their',
+	    'them': 'them',
+	    'then': 'then',
+	    'there': 'there',
+	    'these': 'these',
+	    'they': 'they',
+	    'this': 'this',
+	    'tis': 'tis',
+	    'to': 'to',
+	    'too': 'too',
+	    'twas': 'twas',
+	    'us': 'us',
+	    'wants': 'wants',
+	    'was': 'was',
+	    'we': 'we',
+	    'were': 'were',
+	    'what': 'what',
+	    'when': 'when',
+	    'where': 'where',
+	    'which': 'which',
+	    'while': 'while',
+	    'who': 'who',
+	    'whom': 'whom',
+	    'why': 'why',
+	    'will': 'will',
+	    'with': 'with',
+	    'would': 'would',
+	    'yet': 'yet',
+	    'you': 'you',
+	    'your': 'your'
+	  };
 
 	  lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter');
 	  /*!
@@ -2138,7 +2250,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @see lunr.Pipeline
 	   */
 	  lunr.trimmer = function (token) {
-	    return token.replace(/^\W+/, '').replace(/\W+$/, '');
+	    var result = token.replace(/^\W+/, '').replace(/\W+$/, '');
+	    return result === '' ? undefined : result;
 	  };
 
 	  lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer');
@@ -2445,13 +2558,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (typeof fn !== 'function') {
 	    throw new TypeError('not a function');
 	  }
-	  this._41 = 0;
-	  this._86 = null;
-	  this._17 = [];
+	  this._37 = 0;
+	  this._12 = null;
+	  this._59 = [];
 	  if (fn === noop) return;
 	  doResolve(fn, this);
 	}
-	Promise._1 = noop;
+	Promise._99 = noop;
 
 	Promise.prototype.then = function (onFulfilled, onRejected) {
 	  if (this.constructor !== Promise) {
@@ -2470,24 +2583,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	};
 	function handle(self, deferred) {
-	  while (self._41 === 3) {
-	    self = self._86;
+	  while (self._37 === 3) {
+	    self = self._12;
 	  }
-	  if (self._41 === 0) {
-	    self._17.push(deferred);
+	  if (self._37 === 0) {
+	    self._59.push(deferred);
 	    return;
 	  }
 	  asap(function () {
-	    var cb = self._41 === 1 ? deferred.onFulfilled : deferred.onRejected;
+	    var cb = self._37 === 1 ? deferred.onFulfilled : deferred.onRejected;
 	    if (cb === null) {
-	      if (self._41 === 1) {
-	        resolve(deferred.promise, self._86);
+	      if (self._37 === 1) {
+	        resolve(deferred.promise, self._12);
 	      } else {
-	        reject(deferred.promise, self._86);
+	        reject(deferred.promise, self._12);
 	      }
 	      return;
 	    }
-	    var ret = tryCallOne(cb, self._86);
+	    var ret = tryCallOne(cb, self._12);
 	    if (ret === IS_ERROR) {
 	      reject(deferred.promise, LAST_ERROR);
 	    } else {
@@ -2506,8 +2619,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return reject(self, LAST_ERROR);
 	    }
 	    if (then === self.then && newValue instanceof Promise) {
-	      self._41 = 3;
-	      self._86 = newValue;
+	      self._37 = 3;
+	      self._12 = newValue;
 	      finale(self);
 	      return;
 	    } else if (typeof then === 'function') {
@@ -2515,21 +2628,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	  }
-	  self._41 = 1;
-	  self._86 = newValue;
+	  self._37 = 1;
+	  self._12 = newValue;
 	  finale(self);
 	}
 
 	function reject(self, newValue) {
-	  self._41 = 2;
-	  self._86 = newValue;
+	  self._37 = 2;
+	  self._12 = newValue;
 	  finale(self);
 	}
 	function finale(self) {
-	  for (var i = 0; i < self._17.length; i++) {
-	    handle(self, self._17[i]);
+	  for (var i = 0; i < self._59.length; i++) {
+	    handle(self, self._59[i]);
 	  }
-	  self._17 = null;
+	  self._59 = null;
 	}
 
 	function Handler(onFulfilled, onRejected, promise) {
@@ -2835,7 +2948,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	//This file contains the ES6 extensions to the core Promises/A+ API
 
 	var Promise = __webpack_require__(6);
-	var asap = __webpack_require__(7);
 
 	module.exports = Promise;
 
@@ -2849,9 +2961,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EMPTYSTRING = valuePromise('');
 
 	function valuePromise(value) {
-	  var p = new Promise(Promise._1);
-	  p._41 = 1;
-	  p._86 = value;
+	  var p = new Promise(Promise._99);
+	  p._37 = 1;
+	  p._12 = value;
 	  return p;
 	}
 	Promise.resolve = function (value) {
@@ -2896,16 +3008,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (val && (typeof val === 'object' || typeof val === 'function')) {
 	          if (val instanceof Promise && val.then === Promise.prototype.then) {
-	            while (val._41 === 3) {
-	              val = val._86;
+	            while (val._37 === 3) {
+	              val = val._12;
 	            }
-	            if (val._41 === 1) {
+	            if (val._37 === 1) {
 	              _x = i;
-	              _x2 = val._86;
+	              _x2 = val._12;
 	              _again = true;
 	              continue _function;
 	            }
-	            if (val._41 === 2) reject(val._86);
+	            if (val._37 === 2) reject(val._12);
 	            val.then(function (val) {
 	              res(i, val);
 	            }, reject);
@@ -2973,11 +3085,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  argumentCount = argumentCount || Infinity;
 	  return function () {
 	    var self = this;
-	    var args = Array.prototype.slice.call(arguments);
+	    var args = Array.prototype.slice.call(arguments, 0, argumentCount > 0 ? argumentCount : 0);
 	    return new Promise(function (resolve, reject) {
-	      while (args.length && args.length > argumentCount) {
-	        args.pop();
-	      }
 	      args.push(function (err, res) {
 	        if (err) reject(err);else resolve(res);
 	      });
@@ -3118,11 +3227,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
+	var _mosaicDataset = __webpack_require__(2);
+
 	var _DataSetIndex = __webpack_require__(1);
 
 	var _DataSetIndex2 = _interopRequireDefault(_DataSetIndex);
 
-	var _mosaicDataset = __webpack_require__(2);
+	var _SearchCriteria = __webpack_require__(14);
+
+	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
+
+	var _SearchCriteriaDataSet = __webpack_require__(16);
+
+	var _SearchCriteriaDataSet2 = _interopRequireDefault(_SearchCriteriaDataSet);
 
 	var SearchableDataSet = (function (_DataSet) {
 	    _inherits(SearchableDataSet, _DataSet);
@@ -3135,27 +3252,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        _get(Object.getPrototypeOf(SearchableDataSet.prototype), 'constructor', this).apply(this, params);
-	        this.indexes = {};
-	        var dataSet = this.options.dataSet;
 	        this._onIndexing = this._onIndexing.bind(this);
-	        var indexFields = this.options.indexFields;
-	        for (var key in indexFields) {
-	            var fields = indexFields[key];
-	            var index = new _DataSetIndex2['default']({ dataSet: dataSet, fields: fields });
-	            index.addListener('indexing', this._onIndexing);
-	            index.indexKey = key;
-	            this.indexes[key] = index;
-	        }
+	        this.indexFields = this.options.indexFields;
 	    }
 
 	    _createClass(SearchableDataSet, [{
 	        key: 'close',
 	        value: function close() {
-	            for (var key in this._indexes) {
-	                var index = this._indexes[key];
-	                index.removeListener('indexing', this._onIndexing);
-	            }
-	            this._indexes = {};
+	            this.indexFields = {};
 	            return _get(Object.getPrototypeOf(SearchableDataSet.prototype), 'close', this).call(this);
 	        }
 	    }, {
@@ -3163,24 +3267,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function search(queries) {
 	            var that = this;
 	            return this.action('search', function (intent) {
-	                var indexes = [];
-	                var promises = [];
-	                for (var type in that.indexes) {
-	                    var query = queries[type] || '';
-	                    if (Array.isArray(query)) {
-	                        query = query.join(' ');
-	                    }
-	                    var index = that.indexes[type];
-	                    if (index) {
-	                        indexes.push(index);
-	                        promises.push(index.search(query).promise);
-	                    }
-	                }
-	                return _promise2['default'].all(promises).then(function () {
-	                    return _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, indexes);
-	                }).then(function (items) {
-	                    return that.setItems(items);
+	                return that._getSearchCriteria(queries).then(function (criteria) {
+	                    return criteria.runQuery(that._indexes);
 	                });
+	            });
+	        }
+	    }, {
+	        key: 'setIndexFields',
+	        value: function setIndexFields(indexFields) {
+	            if (this._indexes) {
+	                for (var key in this._indexes) {
+	                    var index = this._indexes[key];
+	                    index.removeListener('indexing', this._onIndexing);
+	                }
+	            }
+	            this._indexes = {};
+	            if (indexFields) {
+	                var dataSet = this.dataSet;
+	                for (var key in indexFields) {
+	                    var fields = indexFields[key];
+	                    var index = new _DataSetIndex2['default']({ dataSet: dataSet, fields: fields });
+	                    index.addListener('indexing', this._onIndexing);
+	                    index.indexKey = key;
+	                    this._indexes[key] = index;
+	                }
+	            }
+	        }
+	    }, {
+	        key: '_getSearchCriteria',
+	        value: function _getSearchCriteria(queries) {
+	            var that = this;
+	            return _promise2['default'].resolve().then(function () {
+	                if (typeof queries.runQuery === 'function') return queries;
+	                var adapters = that.adapters;
+	                var criteria = new _SearchCriteriaDataSet2['default']({ adapters: adapters });
+	                queries = queries || {};
+	                var items = [];
+	                for (var key in queries) {
+	                    var values = queries[key];
+	                    if (values && !Array.isArray(values)) {
+	                        values = [values];
+	                    }
+	                    items.push({ key: key, values: values });
+	                }
+	                criteria.items = items;
+	                return criteria;
 	            });
 	        }
 	    }, {
@@ -3222,6 +3353,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            that._indexingIntent.handle(intent);
 	        }
+	    }, {
+	        key: 'indexFields',
+	        get: function get() {
+	            var result = {};
+	            for (var key in this._indexes) {
+	                var index = this._indexes[key];
+	                result[key] = index.indexFields;
+	            }
+	            return result;
+	        },
+	        set: function set(fields) {
+	            this.setIndexFields(fields);
+	        }
 	    }]);
 
 	    return SearchableDataSet;
@@ -3237,16 +3381,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
-	  value: true
+	    value: true
 	});
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _promise = __webpack_require__(4);
+
+	var _promise2 = _interopRequireDefault(_promise);
 
 	var _mosaicDataset = __webpack_require__(2);
 
@@ -3257,56 +3407,73 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var SearchCriteria = (function (_Data) {
-	  _inherits(SearchCriteria, _Data);
+	    _inherits(SearchCriteria, _Data);
 
-	  function SearchCriteria(options) {
-	    var _get2;
+	    function SearchCriteria(options) {
+	        var _get2;
 
-	    _classCallCheck(this, SearchCriteria);
+	        _classCallCheck(this, SearchCriteria);
 
-	    for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-	      params[_key - 1] = arguments[_key];
-	    }
+	        for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	            params[_key - 1] = arguments[_key];
+	        }
 
-	    (_get2 = _get(Object.getPrototypeOf(SearchCriteria.prototype), 'constructor', this)).call.apply(_get2, [this, options].concat(params));
-	  }
-
-	  /**
-	   * Returns values of search criteria.
-	   */
-
-	  _createClass(SearchCriteria, [{
-	    key: 'values',
-	    get: function get() {
-	      var values = this.get('values') || [];
-	      if (!Array.isArray(values)) {
-	        values = [values];
-	      }
-	      return values;
+	        (_get2 = _get(Object.getPrototypeOf(SearchCriteria.prototype), 'constructor', this)).call.apply(_get2, [this, options].concat(params));
 	    }
 
 	    /**
-	     * Returns the key of this search criteria. This key is used to select the
-	     * index where this search criteria should be applied. (see the
-	     * SearchableDataSet class)
+	     * Returns values of search criteria.
 	     */
-	  }, {
-	    key: 'indexKey',
-	    get: function get() {
-	      return this.get('key') || 'full';
-	    }
 
-	    /**
-	     * Returns a human-readable label for this search criteria.
-	     */
-	  }, {
-	    key: 'label',
-	    get: function get() {
-	      return this.get('label') || this.values.join('; ');
-	    }
-	  }]);
+	    _createClass(SearchCriteria, [{
+	        key: 'runQuery',
 
-	  return SearchCriteria;
+	        /**
+	         * Runs this query against an index from the given object corresponding to
+	         * the key of this query
+	         */
+	        value: function runQuery(indexes) {
+	            var that = this;
+	            return _promise2['default'].resolve().then(function () {
+	                var index = indexes[that.indexKey];
+	                if (index) {
+	                    var query = that.values.join(' ');
+	                    return index.search(query);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'values',
+	        get: function get() {
+	            var values = this.get('values') || [];
+	            if (values && !Array.isArray(values)) {
+	                values = [values];
+	            }
+	            return values;
+	        }
+
+	        /**
+	         * Returns the key of this search criteria. This key is used to select the
+	         * index where this search criteria should be applied. (see the
+	         * SearchableDataSet class)
+	         */
+	    }, {
+	        key: 'indexKey',
+	        get: function get() {
+	            return this.get('key') || 'full';
+	        }
+
+	        /**
+	         * Returns a human-readable label for this search criteria.
+	         */
+	    }, {
+	        key: 'label',
+	        get: function get() {
+	            return this.get('label') || this.values.join('; ');
+	        }
+	    }]);
+
+	    return SearchCriteria;
 	})(_mosaicDataset.Data);
 
 	exports['default'] = SearchCriteria;
@@ -3334,9 +3501,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _promise = __webpack_require__(4);
+
+	var _promise2 = _interopRequireDefault(_promise);
 
 	var _mosaicDataset = __webpack_require__(2);
 
@@ -3376,6 +3549,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'getQuery',
 	        value: function getQuery() {
 	            return SearchCriteriaDataSet.getQuery(this);
+	        }
+	    }, {
+	        key: 'runQuery',
+
+	        /**
+	         * Runs this query against an index from the given object corresponding to
+	         * the key of this query
+	         */
+	        value: function runQuery(indexes) {
+	            var that = this;
+	            return _promise2['default'].resolve().then(function () {
+	                var promises = [];
+	                if (!that.length) {
+	                    var index = indexes['full'];
+	                    return index ? index.search() : undefined;
+	                }
+	                that.forEach(function (item) {
+	                    var promise = item.runQuery(indexes);
+	                    promises.push(promise);
+	                });
+	                var results = new _mosaicDataset.DataSet(that);
+	                return _promise2['default'].all(promises).then(function (resultSets) {
+	                    resultSets = resultSets.filter(function (set) {
+	                        return !!set;
+	                    });
+	                    results.items = _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, _toConsumableArray(resultSets));
+	                    return results;
+	                });
+	            });
 	        }
 	    }, {
 	        key: 'query',
