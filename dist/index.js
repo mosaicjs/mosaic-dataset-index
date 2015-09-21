@@ -104,7 +104,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var _mosaicDataset = __webpack_require__(2);
 
@@ -2445,7 +2445,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      root: this.root,
 	      length: this.length
 	    };
-	  };(function (root, factory) {
+	  };
+
+	  /**
+	   * export the module via AMD, CommonJS or as a browser global
+	   * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
+	   */
+	  (function (root, factory) {
 	    if (true) {
 	      // AMD. Register as an anonymous module.
 	      !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -2469,11 +2475,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return lunr;
 	  });
 	})();
-
-	/**
-	 * export the module via AMD, CommonJS or as a browser global
-	 * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
-	 */
 
 /***/ },
 /* 4 */
@@ -3221,7 +3222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var _promise = __webpack_require__(4);
 
@@ -3268,7 +3269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var that = this;
 	            return this.action('search', function (intent) {
 	                return that._getSearchCriteria(queries).then(function (criteria) {
-	                    return criteria.runQuery(that._indexes);
+	                    return criteria.runQuery(that._indexes, that);
 	                });
 	            });
 	        }
@@ -3310,8 +3311,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                    items.push({ key: key, values: values });
 	                }
-	                criteria.items = items;
-	                return criteria;
+	                return criteria.setItems(items).then(function () {
+	                    return criteria;
+	                });
 	            });
 	        }
 	    }, {
@@ -3392,7 +3394,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var _promise = __webpack_require__(4);
 
@@ -3426,19 +3428,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 
 	    _createClass(SearchCriteria, [{
-	        key: 'runQuery',
+	        key: 'addValues',
+
+	        /**
+	         * Adds the specified search values.
+	         */
+	        value: function addValues(values) {
+	            var index = {};
+	            this.values.forEach(function (val) {
+	                index[val] = true;
+	            });
+	            if (values) {
+	                values.forEach(function (val) {
+	                    index[val] = true;
+	                });
+	            }
+	            values = Object.keys(index);
+	            this.values = values;
+	            return values;
+	        }
+
+	        /**
+	         * Toggles the specified search values (adds values if they does not exist
+	         * and removes them if they already exist).
+	         */
+	    }, {
+	        key: 'toggleValues',
+	        value: function toggleValues(values) {
+	            var index = {};
+	            this.values.forEach(function (val) {
+	                index[val] = true;
+	            });
+	            if (values) {
+	                values.forEach(function (val) {
+	                    if (index[val]) {
+	                        delete index[val];
+	                    } else {
+	                        index[val] = true;
+	                    }
+	                });
+	            } else {
+	                index = {};
+	            }
+	            values = Object.keys(index);
+	            this.values = values;
+	            return values;
+	        }
 
 	        /**
 	         * Runs this query against an index from the given object corresponding to
 	         * the key of this query
 	         */
-	        value: function runQuery(indexes) {
+	    }, {
+	        key: 'runQuery',
+	        value: function runQuery(indexes, resultSet) {
 	            var that = this;
 	            return _promise2['default'].resolve().then(function () {
 	                var index = indexes[that.indexKey];
 	                if (index) {
 	                    var query = that.values.join(' ');
-	                    return index.search(query);
+	                    return index.search(query, resultSet);
 	                }
 	            });
 	        }
@@ -3450,6 +3499,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                values = [values];
 	            }
 	            return values;
+	        },
+
+	        /**
+	         * Sets a new value set for search criteria.
+	         */
+	        set: function set(values) {
+	            if (values && !Array.isArray(values)) {
+	                values = [values];
+	            }
+	            this.set('values', values);
 	        }
 
 	        /**
@@ -3505,7 +3564,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var _promise = __webpack_require__(4);
 
@@ -3515,11 +3574,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _SearchCriteria = __webpack_require__(14);
 
+	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
+
 	/**
 	 * Container for search criteria.
 	 */
-
-	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
 
 	var SearchCriteriaDataSet = (function (_DataSet) {
 	    _inherits(SearchCriteriaDataSet, _DataSet);
@@ -3557,27 +3616,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * Runs this query against an index from the given object corresponding to
 	         * the key of this query
 	         */
-	        value: function runQuery(indexes) {
+	        value: function runQuery(indexes, results) {
 	            var that = this;
 	            return _promise2['default'].resolve().then(function () {
 	                var promises = [];
 	                if (!that.length) {
 	                    var index = indexes['full'];
-	                    return index ? index.search() : undefined;
+	                    return index ? index.search(null, results) : undefined;
 	                }
 	                that.forEach(function (item) {
-	                    var promise = item.runQuery(indexes);
+	                    var resultSet = new _mosaicDataset.DataSet(results);
+	                    var promise = item.runQuery(indexes, resultSet);
 	                    promises.push(promise);
 	                });
-	                var results = new _mosaicDataset.DataSet(that);
 	                return _promise2['default'].all(promises).then(function (resultSets) {
 	                    resultSets = resultSets.filter(function (set) {
 	                        return !!set;
 	                    });
-	                    results.items = _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, _toConsumableArray(resultSets));
-	                    return results;
+	                    var items = that._combineSearchResults(resultSets);
+	                    return results.setItems(items).then(function () {
+	                        return results;
+	                    });
 	                });
 	            });
+	        }
+	    }, {
+	        key: '_combineSearchResults',
+	        value: function _combineSearchResults(resultSets) {
+	            return _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, _toConsumableArray(resultSets));
 	        }
 	    }, {
 	        key: 'query',
