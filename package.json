@@ -1,6 +1,6 @@
 {
   "name": "mosaic-dataset-index",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Lunr-based full-text index for DataSets.",
   "main": "index.js",
   "scripts": {
