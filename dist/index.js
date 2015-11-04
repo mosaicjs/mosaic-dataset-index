@@ -3347,7 +3347,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                that._indexingIntent = that._createSingletonIntent('indexing', {}, function (intent) {
 	                    intent.addListener('progress', function (event) {
 	                        event.indexKey = event.index.indexKey;
-	                        that._indexingIntent.emit('progress', event);
+	                        if (that._indexingIntent) {
+	                            that._indexingIntent.emit('progress', event);
+	                        }
 	                    });
 	                });
 
