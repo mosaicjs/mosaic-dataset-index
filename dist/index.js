@@ -3621,21 +3621,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function runQuery(indexes, results) {
 	            var that = this;
 	            return _promise2['default'].resolve().then(function () {
-	                var promises = [];
 	                if (!that.length) {
 	                    var index = indexes['full'];
 	                    return index ? index.search(null, results) : undefined;
 	                }
-	                that.forEach(function (item) {
-	                    var resultSet = new _mosaicDataset.DataSet(results);
-	                    var promise = item.runQuery(indexes, resultSet);
-	                    promises.push(promise);
-	                });
-	                return _promise2['default'].all(promises).then(function (resultSets) {
-	                    resultSets = resultSets.filter(function (set) {
-	                        return !!set;
-	                    });
-	                    var items = that._combineSearchResults(resultSets);
+	                return that._runQueries(indexes, results).then(function (resultSets) {
+	                    var items = that._combineSearchResults(resultSets, indexes);
 	                    return results.setItems(items).then(function () {
 	                        return results;
 	                    });
@@ -3643,8 +3634,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
+	        key: '_runQueries',
+	        value: function _runQueries(indexes, results) {
+	            return _promise2['default'].all(this.map(function (item) {
+	                var resultSet = new _mosaicDataset.DataSet(results);
+	                return item.runQuery(indexes, resultSet);
+	            }));
+	        }
+	    }, {
 	        key: '_combineSearchResults',
-	        value: function _combineSearchResults(resultSets) {
+	        value: function _combineSearchResults(resultSets, indexes) {
+	            resultSets = resultSets.filter(function (set) {
+	                return !!set;
+	            });
 	            return _mosaicDataset.DataSet.intersection.apply(_mosaicDataset.DataSet, _toConsumableArray(resultSets));
 	        }
 	    }, {
