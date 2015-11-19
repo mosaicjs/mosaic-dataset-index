@@ -3620,16 +3620,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        value: function runQuery(indexes, results) {
 	            var that = this;
-	            return _promise2['default'].resolve().then(function () {
-	                if (!that.length) {
-	                    var index = indexes['full'];
-	                    return index ? index.search(null, results) : undefined;
-	                }
-	                return that._runQueries(indexes, results).then(function (resultSets) {
-	                    var items = that._combineSearchResults(resultSets, indexes);
-	                    return results.setItems(items).then(function () {
-	                        return results;
-	                    });
+	            if (!that.length) {
+	                var defaultIndexKey = this.defaultIndexKey;
+	                var index = indexes[defaultIndexKey];
+	                return index ? index.search(null, results) : undefined;
+	            }
+	            return that._runQueries(indexes, results).then(function (resultSets) {
+	                return that._combineSearchResults(resultSets, indexes);
+	            }).then(function (items) {
+	                return results.setItems(items).then(function () {
+	                    return results;
 	                });
 	            });
 	        }
@@ -3654,12 +3654,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        get: function get() {
 	            return this.getQuery();
 	        }
+	    }, {
+	        key: 'defaultIndexKey',
+
+	        /**
+	         * Returns the name of the default index.
+	         */
+	        get: function get() {
+	            return this.options.defaultIndexKey || 'full';
+	        }
 	    }], [{
 	        key: 'getQuery',
 	        value: function getQuery(set) {
 	            var result = {};
+	            var defaultIndexKey = this.defaultIndexKey;
 	            set.forEach(function (item) {
-	                var key = item.indexKey || 'full';
+	                var key = item.indexKey || defaultIndexKey;
 	                var values = item.values;
 	                if (!key || !values) return;
 	                var array = result[key] = result[key] || [];
