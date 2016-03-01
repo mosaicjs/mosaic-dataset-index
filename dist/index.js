@@ -3322,15 +3322,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var that = this;
 	            var internalIntent = that.intent(key, params);
 	            var counter = 0;
-	            function finalize() {
-	                counter--;
-	                if (counter == 0) {
-	                    internalIntent.resolve();
-	                }
-	            }
 	            internalIntent.handle = function (intent) {
 	                counter++;
-	                intent.then(finalize, finalize);
+	                intent.finalize(function () {
+	                    counter--;
+	                    if (counter == 0) {
+	                        internalIntent.resolve();
+	                    }
+	                });
 	                return method(intent);
 	            };
 	            return internalIntent;
@@ -3340,20 +3339,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _onIndexing(intent) {
 	            var that = this;
 	            if (!that._indexingIntent) {
-	                var finalize = function finalize() {
-	                    delete that._indexingIntent;
-	                };
-
 	                that._indexingIntent = that._createSingletonIntent('indexing', {}, function (intent) {
-	                    intent.addListener('progress', function (event) {
+	                    function listener(event) {
 	                        event.indexKey = event.index.indexKey;
 	                        if (that._indexingIntent) {
 	                            that._indexingIntent.emit('progress', event);
 	                        }
+	                    }
+	                    intent.addListener('progress', listener);
+	                    intent.finalize(function () {
+	                        intent.removeListener('progress', listener);
 	                    });
 	                });
-
-	                that._indexingIntent.then(finalize, finalize);
+	                that._indexingIntent.finalize(function () {
+	                    delete that._indexingIntent;
+	                });
 	            }
 	            that._indexingIntent.handle(intent);
 	        }
@@ -3620,17 +3620,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        value: function runQuery(indexes, results) {
 	            var that = this;
-	            if (!that.length) {
-	                var defaultIndexKey = this.defaultIndexKey;
-	                var index = indexes[defaultIndexKey];
-	                return index ? index.search(null, results) : undefined;
-	            }
-	            return that._runQueries(indexes, results).then(function (resultSets) {
-	                return that._combineSearchResults(resultSets, indexes);
-	            }).then(function (items) {
-	                return results.setItems(items).then(function () {
-	                    return results;
+	            results = results || new _mosaicDataset.DataSet(this.options);
+	            return _promise2['default'].resolve().then(function () {
+	                if (!that.length) {
+	                    var defaultIndexKey = that.defaultIndexKey;
+	                    var index = indexes[defaultIndexKey];
+	                    return index ? index.search(null, results) : undefined;
+	                }
+	                return that._runQueries(indexes, results).then(function (resultSets) {
+	                    return that._combineSearchResults(resultSets, indexes);
+	                }).then(function (items) {
+	                    return results.setItems(items);
 	                });
+	            }).then(function () {
+	                return results;
 	            });
 	        }
 	    }, {
