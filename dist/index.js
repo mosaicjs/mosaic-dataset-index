@@ -341,7 +341,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var that = this;
 	            return that.action('indexing', { index: this }, function (intent) {
 	                that._setIndexingPipeline(index);
-	                var fields = that.indexFields;
+	                var accessors = {};
+	                var fieldKeys = Object.keys(that.indexFields);
+	                fieldKeys.forEach(function (field) {
+	                    var fieldInfo = that.indexFields[field];
+	                    var accessor = undefined;
+	                    if (typeof fieldInfo.get === 'function') {
+	                        accessor = function (item) {
+	                            return fieldInfo.get(item);
+	                        };
+	                    } else {
+	                        accessor = function (item) {
+	                            return item.get(field);
+	                        };
+	                    }
+	                    accessors[field] = accessor;
+	                });
 	                var event = {
 	                    index: that,
 	                    items: items,
@@ -356,11 +371,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    var indexEntry = {
 	                                        _id: item.id
 	                                    };
-	                                    for (var field in fields) {
-	                                        var fieldInfo = fields[field];
-	                                        var value = item.get(field);
+	                                    fieldKeys.forEach(function (field) {
+	                                        var accessor = accessors[field];
+	                                        var value = accessor(item);
 	                                        indexEntry[field] = that._mergeValues(value, ' ');
-	                                    }
+	                                    });
 	                                    index.lunr.add(indexEntry);
 	                                    event.item = item;
 	                                    event.pos++;
