@@ -4212,7 +4212,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var that = this;
 	            return Promise.all(list.map(function (q) {
 	                return q.runQuery(indexes, indexSet);
-	            }));
+	            })).then(function (dataSets) {
+	                var result = [];
+	                dataSets.forEach(function (set) {
+	                    if (!set) {
+	                        set = that._newDataSet();
+	                    }
+	                    result.push(set);
+	                });
+	                return result;
+	            });
 	        }
 	    }, {
 	        key: '_newDataSet',
