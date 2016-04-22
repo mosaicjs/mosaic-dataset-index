@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import { AdapterManager } from 'mosaic-adapters';
-import { QueryVisitor, SerializeQueryListener } from '../lib/query';
+import { QueryVisitor, SerializeQueryListener } from '../';
 
 describe('SerializeQueryListener', function() {
     let adapters = new AdapterManager();

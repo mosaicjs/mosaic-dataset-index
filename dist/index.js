@@ -78,6 +78,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
+	function _interopExportWildcard(obj, defaults) { var newObj = defaults({}, obj); delete newObj['default']; return newObj; }
+
+	function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
+
 	function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
 
 	var _DataSetIndex = __webpack_require__(2);
@@ -98,7 +102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _query = __webpack_require__(19);
 
-	exports.query = _interopRequire(_query);
+	_defaults(exports, _interopExportWildcard(_query, _defaults));
 
 /***/ },
 /* 2 */

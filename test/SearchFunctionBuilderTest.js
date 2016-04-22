@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { DataSet } from 'mosaic-dataset';
 import { AdapterManager } from 'mosaic-adapters';
-import { QueryVisitor, SearchFunctionBuilder } from '../lib/query';
+import { QueryVisitor, SearchFunctionBuilder } from '../';
 
 describe('SearchFunctionBuilder', function() {
     const first = { id : 1, ecosystem : 'digital', country : 'uk', tags : 'design'  };
