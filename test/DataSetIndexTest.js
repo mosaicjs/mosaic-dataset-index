@@ -2,7 +2,6 @@ import expect from 'expect.js';
 import { AdapterManager } from 'mosaic-adapters';
 import { DataSet, Data } from 'mosaic-dataset';
 import { DataSetIndex } from '..';
-import Promise from 'promise';
 import data from './data.json'; 
 
 describe('DataSetIndex', function() {
