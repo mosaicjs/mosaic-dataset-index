@@ -125,14 +125,22 @@ describe('SearchableDataSet', function() {
                 'musee-kwok-on'
             ]
          );
-         testStructuredQueries(
-             'should use complex structured queries', 
-             { category: 'Archéologie', $not : { q : 'Notre-Dame' } },
-             [
-                'musee-de-cluny',
-                'musee-kwok-on'
-             ]
-         );
+        testStructuredQueries(
+                'should use complex structured queries', 
+                { category: 'Archéologie', $not : { q : 'Notre-Dame' } },
+                [
+                   'musee-de-cluny',
+                   'musee-kwok-on'
+                ]
+            );
+        testStructuredQueries(
+                'should use complex structured queries', 
+                { category: 'Archéologie', q$not : 'Notre-Dame' },
+                [
+                   'musee-de-cluny',
+                   'musee-kwok-on'
+                ]
+            );
          testStructuredQueries(
              'should use conditions on the same field (1)',
              { q : [ 'science' ] },
@@ -152,7 +160,33 @@ describe('SearchableDataSet', function() {
              ]
          );
          testStructuredQueries(
-             'should use conditions on the same field (3)',
+             'should use conditions on the same field (2.1)',
+             { q$and : [ 'science', 'découverte' ] },
+             [
+                'palais-de-la-decouverte',
+                'cite-des-sciences-et-de-lindustrie'
+             ]
+         );         
+         testStructuredQueries(
+             'should use conditions on the same field (2.2)',
+             { q : 'science', q$not : 'découverte' },
+             [
+                  'bibliotheque-de-sciences-humaines-et-sociales-paris-descartes-cnrs',
+                  'musee-curie',
+             ]
+         );         
+         testStructuredQueries(
+             'should use conditions on the same field (2.3)',
+             { q$or : [ 'science', 'découverte' ] },
+             [
+                  'cite-des-sciences-et-de-lindustrie',
+                  'bibliotheque-de-sciences-humaines-et-sociales-paris-descartes-cnrs',
+                  'musee-curie',
+                  'palais-de-la-decouverte'
+             ]
+         );         
+         testStructuredQueries(
+             'should use conditions on the same field (3.1)',
              { q : 'science', $not: { q : 'découverte' } },
              [
                 'bibliotheque-de-sciences-humaines-et-sociales-paris-descartes-cnrs',
@@ -160,6 +194,14 @@ describe('SearchableDataSet', function() {
              ]
          );
          testStructuredQueries(
+             'should use conditions on the same field (3.2)',
+             { q : 'science', q$not: 'découverte' },
+             [
+                'bibliotheque-de-sciences-humaines-et-sociales-paris-descartes-cnrs',
+                'musee-curie',
+             ]
+         );
+        testStructuredQueries(
              'should use conditions on the same field (4)',
              { q : ['musée', 'art'], $not: { q : 'national' } },
              [

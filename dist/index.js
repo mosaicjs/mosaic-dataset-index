@@ -3158,16 +3158,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function onValue(field, values) {
 	            var that = this;
 	            var list = that.stack[that.stack.length - 1];
-	            list.push({
-	                runQuery: function runQuery(indexes, indexSet) {
-	                    return Promise.resolve().then(function () {
-	                        var q = values.join(' ');
-	                        var index = indexes[field];
-	                        var r = that._newDataSet();
-	                        return index ? index.search(q, r) : undefined;
-	                    });
-	                }
-	            });
+	            var idx = field.lastIndexOf('$');
+	            var operation = undefined;
+	            if (idx > 0) {
+	                var op = field.substring(idx);
+	                field = field.substring(0, idx);
+	                var suboperations = values.map(function (q) {
+	                    return that._getSearchQuery(field, q);
+	                });
+	                operation = that._getQuery(op, suboperations);
+	            } else {
+	                operation = that._getSearchQuery(field, values.join(' '));
+	            }
+	            list.push(operation);
 	        }
 	    }, {
 	        key: 'beginOperation',
@@ -3183,6 +3186,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (q) {
 	                top.push(q);
 	            }
+	        }
+	    }, {
+	        key: '_getSearchQuery',
+	        value: function _getSearchQuery(field, query) {
+	            var that = this;
+	            return {
+	                name: 'search',
+	                runQuery: function runQuery(indexes, indexSet) {
+	                    return Promise.resolve().then(function () {
+	                        var index = indexes[field];
+	                        var r = that._newDataSet();
+	                        return index ? index.search(query, r) : undefined;
+	                    });
+	                }
+	            };
 	        }
 	    }, {
 	        key: '_getQuery',
@@ -3204,6 +3222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _emptyQuery() {
 	            var that = this;
 	            return {
+	                name: 'noop',
 	                runQuery: function runQuery(indexes, indexSet) {
 	                    return that._newDataSet();
 	                }
@@ -3214,6 +3233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getAndQuery(list) {
 	            var that = this;
 	            return {
+	                name: 'and',
 	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
 	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {
@@ -3243,6 +3263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getOrQuery(list) {
 	            var that = this;
 	            return {
+	                name: 'or',
 	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
 	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {
@@ -3268,6 +3289,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getNotQuery(list) {
 	            var that = this;
 	            return {
+	                name: 'not',
 	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
 	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {

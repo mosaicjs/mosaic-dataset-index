@@ -64,14 +64,24 @@ describe('SearchFunctionBuilder', function() {
             test({$and:{$or:{},$not:{$and:{$or:{},$not:{}}}}})
        ]).then(function(){}).then(done, done);
     });
+    
     it('simple query functions', function(done){
         return Promise.all([
             test({country: 'uk'}, [first, fifth]),
             test({country: 'fr'}, [third]),
             test({tags : 'web'}, [third, fourth, fifth]),
-            test({$or: { ecosystem: 'science', country : 'usa' }}, [third, second, fourth])
+            test({tags : [ 'design', 'web' ] }, [ first, second, third, fourth, fifth ]),
+            test({tags : [ 'web', 'design' ] }, [ first, second, third, fourth, fifth ]),
        ]).then(function(){}).then(done, done);
-    });    
+    });
+
+    it('queries with field conditions', function(done){
+        return Promise.all([
+            test({tags$or : [ 'web', 'design' ] }, [third, fourth, fifth, first, second]),
+            test({tags$and : [ 'web', 'design' ] }, [third]),
+       ]).then(function(){}).then(done, done);
+    });
+    
     it('complex query functions', function(done){
         return test({
             $or : {
