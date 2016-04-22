@@ -7,7 +7,7 @@
 		var a = typeof exports === 'object' ? factory(require("mosaic-dataset"), require("mosaic-adapters")) : factory(root["mosaic-dataset"], root["mosaic-adapters"]);
 		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
 	}
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_15__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_17__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -57,37 +57,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
-	    value: true
+	  value: true
 	});
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	function _interopExportWildcard(obj, defaults) { var newObj = defaults({}, obj); delete newObj['default']; return newObj; }
 
-	var _libDataSetIndex = __webpack_require__(1);
+	function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
 
-	var _libDataSetIndex2 = _interopRequireDefault(_libDataSetIndex);
+	var _lib = __webpack_require__(1);
 
-	var _libSearchableDataSet = __webpack_require__(13);
-
-	var _libSearchableDataSet2 = _interopRequireDefault(_libSearchableDataSet);
-
-	var _libSearchCriteria = __webpack_require__(14);
-
-	var _libSearchCriteria2 = _interopRequireDefault(_libSearchCriteria);
-
-	var _libSearchCriteriaDataSet = __webpack_require__(16);
-
-	var _libSearchCriteriaDataSet2 = _interopRequireDefault(_libSearchCriteriaDataSet);
-
-	exports['default'] = {
-	    DataSetIndex: _libDataSetIndex2['default'],
-	    SearchableDataSet: _libSearchableDataSet2['default'],
-	    SearchCriteria: _libSearchCriteria2['default'],
-	    SearchCriteriaDataSet: _libSearchCriteriaDataSet2['default']
-	};
-	module.exports = exports['default'];
+	_defaults(exports, _interopExportWildcard(_lib, _defaults));
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+
+	var _DataSetIndex = __webpack_require__(2);
+
+	exports.DataSetIndex = _interopRequire(_DataSetIndex);
+
+	var _SearchableDataSet = __webpack_require__(15);
+
+	exports.SearchableDataSet = _interopRequire(_SearchableDataSet);
+
+	var _SearchCriteria = __webpack_require__(16);
+
+	exports.SearchCriteria = _interopRequire(_SearchCriteria);
+
+	var _SearchCriteriaDataSet = __webpack_require__(18);
+
+	exports.SearchCriteriaDataSet = _interopRequire(_SearchCriteriaDataSet);
+
+	var _query = __webpack_require__(19);
+
+	exports.query = _interopRequire(_query);
+
+/***/ },
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -98,7 +112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -106,13 +120,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var _mosaicDataset = __webpack_require__(2);
+	var _mosaicDataset = __webpack_require__(3);
 
-	var _lunr = __webpack_require__(3);
+	var _lunr = __webpack_require__(4);
 
 	var _lunr2 = _interopRequireDefault(_lunr);
 
-	var _promise = __webpack_require__(4);
+	var _promise = __webpack_require__(5);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
@@ -557,13 +571,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -2492,24 +2506,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 /***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = __webpack_require__(5);
-
-/***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	module.exports = __webpack_require__(6);
-	__webpack_require__(8);
-	__webpack_require__(9);
-	__webpack_require__(10);
-	__webpack_require__(11);
 
 /***/ },
 /* 6 */
@@ -2517,7 +2519,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var asap = __webpack_require__(7);
+	module.exports = __webpack_require__(7);
+	__webpack_require__(9);
+	__webpack_require__(10);
+	__webpack_require__(11);
+	__webpack_require__(12);
+	__webpack_require__(14);
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var asap = __webpack_require__(8);
 
 	function noop() {}
 
@@ -2574,13 +2589,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (typeof fn !== 'function') {
 	    throw new TypeError('not a function');
 	  }
-	  this._37 = 0;
-	  this._12 = null;
-	  this._59 = [];
+	  this._45 = 0;
+	  this._81 = 0;
+	  this._65 = null;
+	  this._54 = null;
 	  if (fn === noop) return;
 	  doResolve(fn, this);
 	}
-	Promise._99 = noop;
+	Promise._10 = null;
+	Promise._97 = null;
+	Promise._61 = noop;
 
 	Promise.prototype.then = function (onFulfilled, onRejected) {
 	  if (this.constructor !== Promise) {
@@ -2599,24 +2617,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	};
 	function handle(self, deferred) {
-	  while (self._37 === 3) {
-	    self = self._12;
+	  while (self._81 === 3) {
+	    self = self._65;
 	  }
-	  if (self._37 === 0) {
-	    self._59.push(deferred);
+	  if (Promise._10) {
+	    Promise._10(self);
+	  }
+	  if (self._81 === 0) {
+	    if (self._45 === 0) {
+	      self._45 = 1;
+	      self._54 = deferred;
+	      return;
+	    }
+	    if (self._45 === 1) {
+	      self._45 = 2;
+	      self._54 = [self._54, deferred];
+	      return;
+	    }
+	    self._54.push(deferred);
 	    return;
 	  }
+	  handleResolved(self, deferred);
+	}
+
+	function handleResolved(self, deferred) {
 	  asap(function () {
-	    var cb = self._37 === 1 ? deferred.onFulfilled : deferred.onRejected;
+	    var cb = self._81 === 1 ? deferred.onFulfilled : deferred.onRejected;
 	    if (cb === null) {
-	      if (self._37 === 1) {
-	        resolve(deferred.promise, self._12);
+	      if (self._81 === 1) {
+	        resolve(deferred.promise, self._65);
 	      } else {
-	        reject(deferred.promise, self._12);
+	        reject(deferred.promise, self._65);
 	      }
 	      return;
 	    }
-	    var ret = tryCallOne(cb, self._12);
+	    var ret = tryCallOne(cb, self._65);
 	    if (ret === IS_ERROR) {
 	      reject(deferred.promise, LAST_ERROR);
 	    } else {
@@ -2635,8 +2670,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return reject(self, LAST_ERROR);
 	    }
 	    if (then === self.then && newValue instanceof Promise) {
-	      self._37 = 3;
-	      self._12 = newValue;
+	      self._81 = 3;
+	      self._65 = newValue;
 	      finale(self);
 	      return;
 	    } else if (typeof then === 'function') {
@@ -2644,21 +2679,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	  }
-	  self._37 = 1;
-	  self._12 = newValue;
+	  self._81 = 1;
+	  self._65 = newValue;
 	  finale(self);
 	}
 
 	function reject(self, newValue) {
-	  self._37 = 2;
-	  self._12 = newValue;
+	  self._81 = 2;
+	  self._65 = newValue;
+	  if (Promise._97) {
+	    Promise._97(self, newValue);
+	  }
 	  finale(self);
 	}
 	function finale(self) {
-	  for (var i = 0; i < self._59.length; i++) {
-	    handle(self, self._59[i]);
+	  if (self._45 === 1) {
+	    handle(self, self._54);
+	    self._54 = null;
 	  }
-	  self._59 = null;
+	  if (self._45 === 2) {
+	    for (var i = 0; i < self._54.length; i++) {
+	      handle(self, self._54[i]);
+	    }
+	    self._54 = null;
+	  }
 	}
 
 	function Handler(onFulfilled, onRejected, promise) {
@@ -2691,7 +2735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
@@ -2917,12 +2961,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Promise = __webpack_require__(6);
+	var Promise = __webpack_require__(7);
 
 	module.exports = Promise;
 	Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -2935,12 +2979,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Promise = __webpack_require__(6);
+	var Promise = __webpack_require__(7);
 
 	module.exports = Promise;
 	Promise.prototype['finally'] = function (f) {
@@ -2956,14 +3000,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	//This file contains the ES6 extensions to the core Promises/A+ API
 
-	var Promise = __webpack_require__(6);
+	var Promise = __webpack_require__(7);
 
 	module.exports = Promise;
 
@@ -2977,9 +3021,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EMPTYSTRING = valuePromise('');
 
 	function valuePromise(value) {
-	  var p = new Promise(Promise._99);
-	  p._37 = 1;
-	  p._12 = value;
+	  var p = new Promise(Promise._61);
+	  p._81 = 1;
+	  p._65 = value;
 	  return p;
 	}
 	Promise.resolve = function (value) {
@@ -3019,21 +3063,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _function: while (_again) {
 	        var i = _x,
 	            val = _x2;
-	        then = p = undefined;
 	        _again = false;
 
 	        if (val && (typeof val === 'object' || typeof val === 'function')) {
 	          if (val instanceof Promise && val.then === Promise.prototype.then) {
-	            while (val._37 === 3) {
-	              val = val._12;
+	            while (val._81 === 3) {
+	              val = val._65;
 	            }
-	            if (val._37 === 1) {
+	            if (val._81 === 1) {
 	              _x = i;
-	              _x2 = val._12;
+	              _x2 = val._65;
 	              _again = true;
 	              continue _function;
 	            }
-	            if (val._37 === 2) reject(val._12);
+	            if (val._81 === 2) reject(val._65);
 	            val.then(function (val) {
 	              res(i, val);
 	            }, reject);
@@ -3082,7 +3125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3090,29 +3133,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	// This file contains then/promise specific extensions that are only useful
 	// for node.js interop
 
-	var Promise = __webpack_require__(6);
-	var asap = __webpack_require__(12);
+	var Promise = __webpack_require__(7);
+	var asap = __webpack_require__(13);
 
 	module.exports = Promise;
 
 	/* Static Functions */
 
 	Promise.denodeify = function (fn, argumentCount) {
-	  argumentCount = argumentCount || Infinity;
-	  return function () {
-	    var self = this;
-	    var args = Array.prototype.slice.call(arguments, 0, argumentCount > 0 ? argumentCount : 0);
-	    return new Promise(function (resolve, reject) {
-	      args.push(function (err, res) {
-	        if (err) reject(err);else resolve(res);
-	      });
-	      var res = fn.apply(self, args);
-	      if (res && (typeof res === 'object' || typeof res === 'function') && typeof res.then === 'function') {
-	        resolve(res);
-	      }
-	    });
-	  };
+	  if (typeof argumentCount === 'number' && argumentCount !== Infinity) {
+	    return denodeifyWithCount(fn, argumentCount);
+	  } else {
+	    return denodeifyWithoutCount(fn);
+	  }
 	};
+
+	var callbackFn = 'function (err, res) {' + 'if (err) { rj(err); } else { rs(res); }' + '}';
+	function denodeifyWithCount(fn, argumentCount) {
+	  var args = [];
+	  for (var i = 0; i < argumentCount; i++) {
+	    args.push('a' + i);
+	  }
+	  var body = ['return function (' + args.join(',') + ') {', 'var self = this;', 'return new Promise(function (rs, rj) {', 'var res = fn.call(', ['self'].concat(args).concat([callbackFn]).join(','), ');', 'if (res &&', '(typeof res === "object" || typeof res === "function") &&', 'typeof res.then === "function"', ') {rs(res);}', '});', '};'].join('');
+	  return Function(['Promise', 'fn'], body)(Promise, fn);
+	}
+	function denodeifyWithoutCount(fn) {
+	  var fnLength = Math.max(fn.length - 1, 3);
+	  var args = [];
+	  for (var i = 0; i < fnLength; i++) {
+	    args.push('a' + i);
+	  }
+	  var body = ['return function (' + args.join(',') + ') {', 'var self = this;', 'var args;', 'var argLength = arguments.length;', 'if (arguments.length > ' + fnLength + ') {', 'args = new Array(arguments.length + 1);', 'for (var i = 0; i < arguments.length; i++) {', 'args[i] = arguments[i];', '}', '}', 'return new Promise(function (rs, rj) {', 'var cb = ' + callbackFn + ';', 'var res;', 'switch (argLength) {', args.concat(['extra']).map(function (_, index) {
+	    return 'case ' + index + ':' + 'res = fn.call(' + ['self'].concat(args.slice(0, index)).concat('cb').join(',') + ');' + 'break;';
+	  }).join(''), 'default:', 'args[argLength] = cb;', 'res = fn.apply(self, args);', '}', 'if (res &&', '(typeof res === "object" || typeof res === "function") &&', 'typeof res.then === "function"', ') {rs(res);}', '});', '};'].join('');
+
+	  return Function(['Promise', 'fn'], body)(Promise, fn);
+	}
+
 	Promise.nodeify = function (fn) {
 	  return function () {
 	    var args = Array.prototype.slice.call(arguments);
@@ -3149,13 +3206,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(7);
+	var rawAsap = __webpack_require__(8);
 	// RawTasks are recycled to reduce GC churn.
 	var freeTasks = [];
 	// We queue errors to ensure they are thrown in right order (FIFO).
@@ -3220,7 +3277,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 13 */
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Promise = __webpack_require__(7);
+
+	module.exports = Promise;
+	Promise.enableSynchronous = function () {
+	  Promise.prototype.isPending = function () {
+	    return this.getState() == 0;
+	  };
+
+	  Promise.prototype.isFulfilled = function () {
+	    return this.getState() == 1;
+	  };
+
+	  Promise.prototype.isRejected = function () {
+	    return this.getState() == 2;
+	  };
+
+	  Promise.prototype.getValue = function () {
+	    if (this._81 === 3) {
+	      return this._65.getValue();
+	    }
+
+	    if (!this.isFulfilled()) {
+	      throw new Error('Cannot get a value of an unfulfilled promise.');
+	    }
+
+	    return this._65;
+	  };
+
+	  Promise.prototype.getReason = function () {
+	    if (this._81 === 3) {
+	      return this._65.getReason();
+	    }
+
+	    if (!this.isRejected()) {
+	      throw new Error('Cannot get a rejection reason of a non-rejected promise.');
+	    }
+
+	    return this._65;
+	  };
+
+	  Promise.prototype.getState = function () {
+	    if (this._81 === 3) {
+	      return this._65.getState();
+	    }
+	    if (this._81 === -1 || this._81 === -2) {
+	      return 0;
+	    }
+
+	    return this._81;
+	  };
+	};
+
+	Promise.disableSynchronous = function () {
+	  Promise.prototype.isPending = undefined;
+	  Promise.prototype.isFulfilled = undefined;
+	  Promise.prototype.isRejected = undefined;
+	  Promise.prototype.getValue = undefined;
+	  Promise.prototype.getReason = undefined;
+	  Promise.prototype.getState = undefined;
+	};
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3231,7 +3355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -3239,21 +3363,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var _promise = __webpack_require__(4);
+	var _promise = __webpack_require__(5);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _mosaicDataset = __webpack_require__(2);
+	var _mosaicDataset = __webpack_require__(3);
 
-	var _DataSetIndex = __webpack_require__(1);
+	var _DataSetIndex = __webpack_require__(2);
 
 	var _DataSetIndex2 = _interopRequireDefault(_DataSetIndex);
 
-	var _SearchCriteria = __webpack_require__(14);
+	var _SearchCriteria = __webpack_require__(16);
 
 	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
 
-	var _SearchCriteriaDataSet = __webpack_require__(16);
+	var _SearchCriteriaDataSet = __webpack_require__(18);
 
 	var _SearchCriteriaDataSet2 = _interopRequireDefault(_SearchCriteriaDataSet);
 
@@ -3394,7 +3518,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3405,7 +3529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -3413,13 +3537,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var _promise = __webpack_require__(4);
+	var _promise = __webpack_require__(5);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _mosaicDataset = __webpack_require__(2);
+	var _mosaicDataset = __webpack_require__(3);
 
-	var _mosaicAdapters = __webpack_require__(15);
+	var _mosaicAdapters = __webpack_require__(17);
 
 	/**
 	 * Instances of this type are used as containers for search criteria.
@@ -3556,13 +3680,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = exports['default'];
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_15__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_17__;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3573,7 +3697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -3583,13 +3707,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var _promise = __webpack_require__(4);
+	var _promise = __webpack_require__(5);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _mosaicDataset = __webpack_require__(2);
+	var _mosaicDataset = __webpack_require__(3);
 
-	var _SearchCriteria = __webpack_require__(14);
+	var _SearchCriteria = __webpack_require__(16);
 
 	var _SearchCriteria2 = _interopRequireDefault(_SearchCriteria);
 
@@ -3703,6 +3827,461 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(_mosaicDataset.DataSet);
 
 	exports['default'] = SearchCriteriaDataSet;
+	module.exports = exports['default'];
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+
+	var _PrintQueryListener = __webpack_require__(20);
+
+	exports.PrintQueryListener = _interopRequire(_PrintQueryListener);
+
+	var _QueryListener = __webpack_require__(21);
+
+	exports.QueryListener = _interopRequire(_QueryListener);
+
+	var _QueryVisitor = __webpack_require__(22);
+
+	exports.QueryVisitor = _interopRequire(_QueryVisitor);
+
+	var _SearchFunctionBuilder = __webpack_require__(23);
+
+	exports.SearchFunctionBuilder = _interopRequire(_SearchFunctionBuilder);
+
+	var _SerializeQueryListener = __webpack_require__(24);
+
+	exports.SerializeQueryListener = _interopRequire(_SerializeQueryListener);
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var _QueryListener2 = __webpack_require__(21);
+
+	var _QueryListener3 = _interopRequireDefault(_QueryListener2);
+
+	var PrintQueryListener = (function (_QueryListener) {
+	    _inherits(PrintQueryListener, _QueryListener);
+
+	    function PrintQueryListener(options) {
+	        _classCallCheck(this, PrintQueryListener);
+
+	        _get(Object.getPrototypeOf(PrintQueryListener.prototype), 'constructor', this).call(this, options);
+	        this.depth = 0;
+	    }
+
+	    _createClass(PrintQueryListener, [{
+	        key: 'onValue',
+	        value: function onValue(field, values) {
+	            this._print('<' + field + '>' + values.join(', ') + '</' + field + '>');
+	        }
+	    }, {
+	        key: 'beginOperation',
+	        value: function beginOperation(op) {
+	            this._print('<' + op + '>');
+	            this.depth++;
+	        }
+	    }, {
+	        key: 'endOperation',
+	        value: function endOperation(op) {
+	            this.depth--;
+	            this._print('</' + op + '>');
+	        }
+	    }, {
+	        key: '_print',
+	        value: function _print(msg) {
+	            var shift = '';
+	            for (var i = 0; i < this.depth; i++) {
+	                shift += '  ';
+	            }
+	            console.log(shift + msg);
+	        }
+	    }]);
+
+	    return PrintQueryListener;
+	})(_QueryListener3['default']);
+
+	exports['default'] = PrintQueryListener;
+	module.exports = exports['default'];
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var QueryListener = (function () {
+	    function QueryListener(options) {
+	        _classCallCheck(this, QueryListener);
+
+	        this.options = options || {};
+	    }
+
+	    _createClass(QueryListener, [{
+	        key: "onValue",
+	        value: function onValue(field, values) {}
+	    }, {
+	        key: "beginOperation",
+	        value: function beginOperation(op) {}
+	    }, {
+	        key: "endOperation",
+	        value: function endOperation(op) {}
+	    }]);
+
+	    return QueryListener;
+	})();
+
+	exports["default"] = QueryListener;
+	module.exports = exports["default"];
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var QueryVisitor = (function () {
+	    function QueryVisitor(options) {
+	        _classCallCheck(this, QueryVisitor);
+
+	        this.options = options || {};
+	        this.options.operation = this.options.operation || '$and';
+	    }
+
+	    _createClass(QueryVisitor, [{
+	        key: 'visit',
+	        value: function visit(query, listener) {
+	            return visit(this.options.operation, query, listener);
+
+	            function visit(op, query, listener) {
+	                listener.beginOperation(op);
+	                for (var key in query) {
+	                    var value = query[key];
+	                    if (key[0] === '$') {
+	                        visit(key, value, listener);
+	                    } else {
+	                        var values = [];
+	                        if (!!value) {
+	                            if (!Array.isArray(value)) {
+	                                value = [value];
+	                            }
+	                            value.forEach(function (val) {
+	                                if (typeof val === 'object') {
+	                                    throw new Error('Field criteria ' + 'can not be objects.');
+	                                }
+	                                values.push(val);
+	                            });
+	                        }
+	                        listener.onValue(key, values);
+	                    }
+	                }
+	                listener.endOperation(op);
+	            }
+	        }
+	    }]);
+
+	    return QueryVisitor;
+	})();
+
+	exports['default'] = QueryVisitor;
+	module.exports = exports['default'];
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var _mosaicDataset = __webpack_require__(3);
+
+	var _QueryListener2 = __webpack_require__(21);
+
+	var _QueryListener3 = _interopRequireDefault(_QueryListener2);
+
+	var SearchFunctionBuilder = (function (_QueryListener) {
+	    _inherits(SearchFunctionBuilder, _QueryListener);
+
+	    function SearchFunctionBuilder(options) {
+	        _classCallCheck(this, SearchFunctionBuilder);
+
+	        _get(Object.getPrototypeOf(SearchFunctionBuilder.prototype), 'constructor', this).call(this, options);
+	        this.stack = [[]];
+	    }
+
+	    _createClass(SearchFunctionBuilder, [{
+	        key: 'onValue',
+	        value: function onValue(field, values) {
+	            var that = this;
+	            var list = that.stack[that.stack.length - 1];
+	            list.push({
+	                runQuery: function runQuery(indexes) {
+	                    return Promise.resolve().then(function () {
+	                        var q = values.join(' ');
+	                        var index = indexes[field];
+	                        var r = that._newDataSet();
+	                        return index ? index.search(q, r) : undefined;
+	                    });
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'beginOperation',
+	        value: function beginOperation(op) {
+	            this.stack.push([]);
+	        }
+	    }, {
+	        key: 'endOperation',
+	        value: function endOperation(op) {
+	            var list = this.stack.pop();
+	            var top = this.stack[this.stack.length - 1];
+	            var q = this._getQuery(op, list);
+	            if (q) {
+	                top.push(q);
+	            }
+	        }
+	    }, {
+	        key: '_getQuery',
+	        value: function _getQuery(op, list) {
+	            if (list.length) {
+	                if (op === '$and') {
+	                    return this._getAndQuery(list);
+	                } else if (op === '$or') {
+	                    return this._getOrQuery(list);
+	                } else if (op === '$not') {
+	                    return this._getNotQuery(list);
+	                }
+	            }
+	        }
+	    }, {
+	        key: '_getAndQuery',
+	        value: function _getAndQuery(list) {
+	            var that = this;
+	            return {
+	                runQuery: function runQuery(indexes) {
+	                    return Promise.resolve().then(function () {
+	                        return Promise.all(list.map(function (q) {
+	                            return q.runQuery(indexes);
+	                        })).then(function (dataSets) {
+	                            dataSets = dataSets.sort(function (a, b) {
+	                                return a.length > b.length ? 1 : -1;
+	                            });
+	                            var items = [];
+	                            var first = dataSets.shift();
+	                            first.forEach(function (item) {
+	                                var contained = true;
+	                                for (var i = 0; contained && i < dataSets.length; i++) {
+	                                    var set = dataSets[i];
+	                                    contained = set.has(item);
+	                                }
+	                                if (contained) {
+	                                    items.push(item);
+	                                }
+	                            });
+	                            return that._newDataSet(items);
+	                        });
+	                    });
+	                }
+	            };
+	        }
+	    }, {
+	        key: '_getOrQuery',
+	        value: function _getOrQuery(list) {
+	            var that = this;
+	            return {
+	                runQuery: function runQuery(indexes) {
+	                    return Promise.resolve().then(function () {
+	                        return Promise.all(list.map(function (q) {
+	                            return q.runQuery(indexes);
+	                        })).then(function (resultSets) {
+	                            var items = [];
+	                            var index = {};
+	                            for (var i = 0; i < resultSets.length; i++) {
+	                                resultSets[i].forEach(function (item) {
+	                                    var id = item.id;
+	                                    if (!(id in index)) {
+	                                        index[id] = item;
+	                                        items.push(item);
+	                                    }
+	                                });
+	                            }
+	                            return that._newDataSet(items);
+	                        });
+	                    });
+	                }
+	            };
+	        }
+	    }, {
+	        key: '_getNotQuery',
+	        value: function _getNotQuery(list) {
+	            var that = this;
+	            return {
+	                runQuery: function runQuery(indexes) {
+	                    return Promise.resolve().then(function () {
+	                        return Promise.all(list.map(function (q) {
+	                            return q.runQuery(indexes);
+	                        })).then(function (resultSets) {
+	                            var items = [];
+	                            var parentSet = results.dataSet;
+	                            if (parentSet) {
+	                                parentSet.forEach(function (item) {
+	                                    var contained = false;
+	                                    for (var i = 0; !contained && i < resultSets.length; i++) {
+	                                        contained = resultSets[i].has(item);
+	                                    }
+	                                    if (!contained) {
+	                                        items.push(item);
+	                                    }
+	                                });
+	                            }
+	                            return that._newDataSet(items);
+	                        });
+	                    });
+	                }
+	            };
+	        }
+	    }, {
+	        key: '_newDataSet',
+	        value: function _newDataSet(items) {
+	            items = items || [];
+	            var set = new _mosaicDataset.DataSet(_extends({}, this.options, { items: items }));
+	            return set;
+	        }
+	    }, {
+	        key: 'query',
+	        get: function get() {
+	            var op = this.options.operation || '$and';
+	            var list = this.stack[this.stack.length - 1];
+	            return this._getQuery(op, list);
+	        }
+	    }]);
+
+	    return SearchFunctionBuilder;
+	})(_QueryListener3['default']);
+
+	exports['default'] = SearchFunctionBuilder;
+	module.exports = exports['default'];
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var _QueryListener2 = __webpack_require__(21);
+
+	var _QueryListener3 = _interopRequireDefault(_QueryListener2);
+
+	var SerializeListener = (function (_QueryListener) {
+	    _inherits(SerializeListener, _QueryListener);
+
+	    function SerializeListener(options) {
+	        _classCallCheck(this, SerializeListener);
+
+	        _get(Object.getPrototypeOf(SerializeListener.prototype), 'constructor', this).call(this, options);
+	        this.query = {};
+	        this.stack = [{}];
+	    }
+
+	    _createClass(SerializeListener, [{
+	        key: 'onValue',
+	        value: function onValue(field, values) {
+	            var top = this.stack[this.stack.length - 1];
+	            top[field] = values;
+	        }
+	    }, {
+	        key: 'beginOperation',
+	        value: function beginOperation(op) {
+	            this.stack.push({});
+	        }
+	    }, {
+	        key: 'endOperation',
+	        value: function endOperation(op) {
+	            var obj = this.stack.pop();
+	            if (Object.keys(obj).length) {
+	                this.query = obj;
+	                if (this.stack.length) {
+	                    var peek = this.stack[this.stack.length - 1];
+	                    peek[op] = obj;
+	                }
+	            }
+	        }
+	    }]);
+
+	    return SerializeListener;
+	})(_QueryListener3['default']);
+
+	exports['default'] = SerializeListener;
 	module.exports = exports['default'];
 
 /***/ }

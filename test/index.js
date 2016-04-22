@@ -6,3 +6,5 @@ require("babel/register")({
 });
 require('./DataSetIndexTest');
 require('./SearchableDataSetTest');
+require('./SerializeQueryListenerTest');
+require('./SearchFunctionBuilderTest');
