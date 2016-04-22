@@ -4075,7 +4075,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var that = this;
 	            var list = that.stack[that.stack.length - 1];
 	            list.push({
-	                runQuery: function runQuery(indexes) {
+	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
 	                        var q = values.join(' ');
 	                        var index = indexes[field];
@@ -4111,27 +4111,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	                } else if (op === '$not') {
 	                    return this._getNotQuery(list);
 	                }
+	            } else {
+	                return this._emptyQuery();
 	            }
+	        }
+	    }, {
+	        key: '_emptyQuery',
+	        value: function _emptyQuery() {
+	            var that = this;
+	            return {
+	                runQuery: function runQuery(indexes, indexSet) {
+	                    return that._newDataSet();
+	                }
+	            };
 	        }
 	    }, {
 	        key: '_getAndQuery',
 	        value: function _getAndQuery(list) {
 	            var that = this;
 	            return {
-	                runQuery: function runQuery(indexes) {
+	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
-	                        return Promise.all(list.map(function (q) {
-	                            return q.runQuery(indexes);
-	                        })).then(function (dataSets) {
-	                            dataSets = dataSets.sort(function (a, b) {
+	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {
+	                            resultSets = resultSets.sort(function (a, b) {
 	                                return a.length > b.length ? 1 : -1;
 	                            });
 	                            var items = [];
-	                            var first = dataSets.shift();
+	                            var first = resultSets.shift();
 	                            first.forEach(function (item) {
 	                                var contained = true;
-	                                for (var i = 0; contained && i < dataSets.length; i++) {
-	                                    var set = dataSets[i];
+	                                for (var i = 0; contained && i < resultSets.length; i++) {
+	                                    var set = resultSets[i];
 	                                    contained = set.has(item);
 	                                }
 	                                if (contained) {
@@ -4149,11 +4159,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getOrQuery(list) {
 	            var that = this;
 	            return {
-	                runQuery: function runQuery(indexes) {
+	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
-	                        return Promise.all(list.map(function (q) {
-	                            return q.runQuery(indexes);
-	                        })).then(function (resultSets) {
+	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {
 	                            var items = [];
 	                            var index = {};
 	                            for (var i = 0; i < resultSets.length; i++) {
@@ -4176,13 +4184,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _getNotQuery(list) {
 	            var that = this;
 	            return {
-	                runQuery: function runQuery(indexes) {
+	                runQuery: function runQuery(indexes, indexSet) {
 	                    return Promise.resolve().then(function () {
-	                        return Promise.all(list.map(function (q) {
-	                            return q.runQuery(indexes);
-	                        })).then(function (resultSets) {
+	                        return that._runSubqueries(list, indexes, indexSet).then(function (resultSets) {
 	                            var items = [];
-	                            var parentSet = results.dataSet;
+	                            var parentSet = indexSet ? indexSet.dataSet : null;
 	                            if (parentSet) {
 	                                parentSet.forEach(function (item) {
 	                                    var contained = false;
@@ -4199,6 +4205,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    });
 	                }
 	            };
+	        }
+	    }, {
+	        key: '_runSubqueries',
+	        value: function _runSubqueries(list, indexes, indexSet) {
+	            var that = this;
+	            return Promise.all(list.map(function (q) {
+	                return q.runQuery(indexes, indexSet);
+	            }));
 	        }
 	    }, {
 	        key: '_newDataSet',

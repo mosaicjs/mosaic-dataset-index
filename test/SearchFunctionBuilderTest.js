@@ -44,18 +44,15 @@ describe('SearchFunctionBuilder', function() {
         return Promise.resolve().then(function(){
             const listener = new SearchFunctionBuilder();
             visitor.visit(test, listener);
-            if (!control){
-                expect(listener.query).to.be(undefined);
-            } else {
-                return listener.query.runQuery(index)//
-                .then(function(results){
-                    expect(!!results).to.be(true);
-                    expect(results.length).to.be(control.length);
-                    results.forEach(function(item, i){
-                        expect(item.data).to.eql(control[i]);                            
-                    });
+            control = control || [];
+            return listener.query.runQuery(index)//
+            .then(function(results){
+                expect(!!results).to.be(true);
+                expect(results.length).to.be(control.length);
+                results.forEach(function(item, i){
+                    expect(item.data).to.eql(control[i]);                            
                 });
-            }
+            });
         })
     }
     it('no query for empty requests', function(done){
