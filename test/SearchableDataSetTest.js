@@ -179,10 +179,10 @@ describe('SearchableDataSet', function() {
              'should use conditions on the same field (2.3)',
              { q$or : [ 'science', 'découverte' ] },
              [
+                  'palais-de-la-decouverte',
                   'cite-des-sciences-et-de-lindustrie',
                   'bibliotheque-de-sciences-humaines-et-sociales-paris-descartes-cnrs',
                   'musee-curie',
-                  'palais-de-la-decouverte'
              ]
          );         
          testStructuredQueries(

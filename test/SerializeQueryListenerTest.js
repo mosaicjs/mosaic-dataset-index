@@ -33,5 +33,18 @@ describe('SerializeQueryListener', function() {
             },
             tags : [ 'design' ]
         });
+        test({
+            tags : 'design',
+            $or : {
+                ecosystem : [ 'science', 'digital' ],
+                country : 'usa'
+            }
+        },{
+            $or : {
+                ecosystem : [ 'digital', 'science' ],
+                country : [ 'usa' ]
+            },
+            tags : [ 'design' ]
+        });        
     });
 });

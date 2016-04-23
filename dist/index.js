@@ -3419,7 +3419,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function SerializeListener(options) {
 	        _classCallCheck(this, SerializeListener);
 
-	        _get(Object.getPrototypeOf(SerializeListener.prototype), 'constructor', this).call(this, options);
+	        _get(Object.getPrototypeOf(SerializeListener.prototype), 'constructor', this).call(this, options || { normalize: true });
+	        this.options.normalize = !!this.options.normalize;
 	        this.query = {};
 	        this.stack = [{}];
 	    }
@@ -3428,7 +3429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'onValue',
 	        value: function onValue(field, values) {
 	            var top = this.stack[this.stack.length - 1];
-	            top[field] = values;
+	            top[field] = this._normalize(values);
 	        }
 	    }, {
 	        key: 'beginOperation',
@@ -3438,14 +3439,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'endOperation',
 	        value: function endOperation(op) {
+	            var _this = this;
+
 	            var obj = this.stack.pop();
-	            if (Object.keys(obj).length) {
-	                this.query = obj;
-	                if (this.stack.length) {
-	                    var peek = this.stack[this.stack.length - 1];
-	                    peek[op] = obj;
-	                }
+	            var keys = this._normalize(Object.keys(obj));
+	            if (keys.length) {
+	                (function () {
+	                    var node = {};
+	                    keys.forEach(function (key) {
+	                        node[key] = obj[key];
+	                    });
+	                    _this.query = node;
+	                    if (_this.stack.length) {
+	                        var peek = _this.stack[_this.stack.length - 1];
+	                        peek[op] = node;
+	                    }
+	                })();
 	            }
+	        }
+	    }, {
+	        key: '_normalize',
+	        value: function _normalize(list) {
+	            if (!list) return [];
+	            if (this.options.normalize) {
+	                list = list.sort(function (a, b) {
+	                    a = '' + a;
+	                    b = '' + b;
+	                    return a > b ? 1 : a < b ? -1 : 0;
+	                });
+	            }
+	            return list;
 	        }
 	    }]);
 
